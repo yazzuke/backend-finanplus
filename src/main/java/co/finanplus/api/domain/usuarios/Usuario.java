@@ -16,7 +16,8 @@ public class Usuario {
 
     @Id
     private String id;
-    private String Nombre;
-    private String Email;
+    private String nombre;
+    private String email;
+    private String photo_url;
 
 }
