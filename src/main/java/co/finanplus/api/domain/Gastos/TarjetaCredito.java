@@ -17,6 +17,7 @@ public class TarjetaCredito {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "TarjetaCreditoID")  
     private Long TarjetaCreditoID;
 
     @Column(name = "UsuarioID")
