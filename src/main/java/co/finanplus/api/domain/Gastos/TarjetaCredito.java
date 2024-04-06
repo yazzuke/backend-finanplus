@@ -28,7 +28,7 @@ public class TarjetaCredito {
 
     @Column(name = "Fecha_Pago")
     private LocalDate fechaPago;
-
+    
     @Column(name = "Valor_Total")
     private BigDecimal valorTotal;
 
