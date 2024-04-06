@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 @Entity
 @Table(name = "tarjetascredito")
 @Getter
@@ -17,8 +19,8 @@ public class TarjetaCredito {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "TarjetaCreditoID")  
-    private Long TarjetaCreditoID;
+    @Column(name = "TarjetaCreditoID") //
+    private Long tarjetaCreditoID; //
 
     @Column(name = "UsuarioID")
     private String usuarioID;
@@ -32,4 +34,7 @@ public class TarjetaCredito {
     @Column(name = "Valor_Total")
     private BigDecimal valorTotal;
 
+    @OneToMany(mappedBy = "tarjetaCredito", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<GastoTarjeta> gastos;
 }

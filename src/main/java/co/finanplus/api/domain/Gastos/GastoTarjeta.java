@@ -1,12 +1,9 @@
 package co.finanplus.api.domain.Gastos;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import lombok.*;
+import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "gastostarjeta")
@@ -22,7 +19,7 @@ public class GastoTarjeta {
 
     @ManyToOne
     @JoinColumn(name = "TarjetaCreditoID")
-    @JsonManagedReference
+    @JsonBackReference
     private TarjetaCredito tarjetaCredito;
 
     @Column(name = "Nombre_Gasto")
@@ -39,5 +36,4 @@ public class GastoTarjeta {
 
     @Column(name = "Interes")
     private BigDecimal interes;
-
 }
