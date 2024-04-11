@@ -1,4 +1,4 @@
-package co.finanplus.api.domain.Gastos;
+package co.finanplus.api.domain.Gastos.Tarjetas;
 
 import java.util.List;
 

@@ -6,10 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import co.finanplus.api.domain.Gastos.GastoTarjeta;
-import co.finanplus.api.domain.Gastos.GastoTarjetaRepository;
-import co.finanplus.api.domain.Gastos.TarjetaCredito;
-import co.finanplus.api.domain.Gastos.TarjetaCreditoRepository;
+import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjeta;
+import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjetaRepository;
+import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCredito;
+import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
 
 import java.util.List;
 
