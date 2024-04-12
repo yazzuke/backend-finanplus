@@ -34,8 +34,9 @@ public class GastoTarjeta {
     @Column(name = "Valor_Total_Gasto")
     private BigDecimal valorTotalGasto;
 
-    @Column(name = "Interes")
-    private BigDecimal interes;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo")
+    private TipoGasto tipo;
 
     public BigDecimal getValorTotalGasto() {
         return valorTotalGasto;

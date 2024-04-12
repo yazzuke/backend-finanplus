@@ -16,6 +16,6 @@ CREATE TABLE GastosTarjeta (
   Cuota_Gasto INT,
   Valor_Cuota_Gasto DECIMAL(10, 2),
   Valor_Total_Gasto DECIMAL(10, 2),
-  Interes DECIMAL(5, 2),
+  tipo ENUM('Necesidad', 'Deseos', 'Metas') NOT NULL,
   FOREIGN KEY (TarjetaCreditoID) REFERENCES TarjetasCredito(TarjetaCreditoID)
 );
