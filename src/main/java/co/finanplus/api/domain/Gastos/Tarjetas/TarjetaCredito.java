@@ -32,9 +32,11 @@ public class TarjetaCredito {
     private LocalDate fechaPago;
 
     @Column(name = "Valor_Total")
-    private BigDecimal valorTotal;
+    private BigDecimal valorTotal = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "tarjetaCredito", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<GastoTarjeta> gastos;
+
+   
 }

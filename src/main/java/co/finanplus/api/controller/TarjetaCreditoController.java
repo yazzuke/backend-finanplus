@@ -10,6 +10,7 @@ import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjeta;
 import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjetaRepository;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCredito;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
+import java.math.BigDecimal;
 
 import java.util.List;
 
@@ -42,15 +43,26 @@ public class TarjetaCreditoController {
     // endpoint para agregar un gasto a una tarjeta de crédito específica
     @PostMapping("/{tarjetaCreditoID}/gastos")
     public ResponseEntity<GastoTarjeta> addGasto(@PathVariable Long tarjetaCreditoID,
-                                                 @RequestBody GastoTarjeta gasto) {
+            @RequestBody GastoTarjeta gasto) {
         TarjetaCredito tarjeta = tarjetaCreditoRepository.findById(tarjetaCreditoID)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
-                         "Tarjeta de Crédito no encontrada con ID: " + tarjetaCreditoID));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Tarjeta de Crédito no encontrada con ID: " + tarjetaCreditoID));
         gasto.setTarjetaCredito(tarjeta);
+
+        // Agrega el valor del gasto al total actual de la tarjeta de crédito
+        BigDecimal valorTotalActual = tarjeta.getValorTotal();
+        if (valorTotalActual == null) {
+            valorTotalActual = BigDecimal.ZERO;
+        }
+        BigDecimal nuevoValorTotal = valorTotalActual.add(gasto.getValorTotalGasto());
+        tarjeta.setValorTotal(nuevoValorTotal);
+
+        // Guarda el gasto y actualiza la tarjeta de crédito
         GastoTarjeta savedGasto = gastoTarjetaRepository.save(gasto);
+        tarjetaCreditoRepository.save(tarjeta); // Guarda la tarjeta de crédito con el nuevo valor total
+
         return new ResponseEntity<>(savedGasto, HttpStatus.CREATED);
     }
-    
 
     // endpoint para obtener los gastos de una tarjeta de crédito específica
     @GetMapping("/{tarjetaCreditoID}/gastos")

@@ -3,6 +3,7 @@ CREATE TABLE GastosFijos (
   Gasto_FijoID INT AUTO_INCREMENT PRIMARY KEY,
   UsuarioID VARCHAR(100),
   Nombre_Gasto VARCHAR(255),
+  Valor_Total DECIMAL(10, 2),
   FOREIGN KEY (UsuarioID) REFERENCES Usuarios(id)
 );
 

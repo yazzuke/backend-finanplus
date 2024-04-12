@@ -36,4 +36,8 @@ public class GastoTarjeta {
 
     @Column(name = "Interes")
     private BigDecimal interes;
+
+    public BigDecimal getValorTotalGasto() {
+        return valorTotalGasto;
+    }
 }

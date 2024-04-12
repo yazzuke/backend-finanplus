@@ -28,7 +28,7 @@ public class GastoInvFijo {
     private String nombreGasto;
 
     @Column(name = "Valor_Gasto")
-    private Integer valorGasto;
+    private BigDecimal valorGasto;
 
     @Column(name = "Fecha")
     private LocalDate fecha;
@@ -37,5 +37,8 @@ public class GastoInvFijo {
     @Column(name = "tipo")
     private TipoGasto tipo;
 
-  
+    public BigDecimal getValorTotalGasto() {
+        return valorGasto;
+    }
+
 }

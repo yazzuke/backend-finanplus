@@ -15,6 +15,7 @@ import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjetaRepository;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCredito;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -51,9 +52,21 @@ public class GastoFijoController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
                          "Gasto Fijo no encontrado con ID: " + gastoFijoID));
         gasto.setGastoFijo(gastoFijo);
+    
+        // Agrega el valor del gasto al total actual del gasto fijo
+        BigDecimal valorTotalActual = gastoFijo.getValorTotal();
+        if (valorTotalActual == null) {
+            valorTotalActual = BigDecimal.ZERO;
+        }
+        BigDecimal nuevoValorTotal = valorTotalActual.add(gasto.getValorTotalGasto());
+        gastoFijo.setValorTotal(nuevoValorTotal);
+    
+        // Guarda el gasto y actualiza el gasto fijo
         GastoInvFijo savedGasto = gastoInvFijoRepository.save(gasto);
+        gastoFijoRepository.save(gastoFijo); // Guarda el gasto fijo con el nuevo valor total
+    
         return new ResponseEntity<>(savedGasto, HttpStatus.CREATED);
-    }    
+    }  
     
     // endpoint para obtener los gastos de un gasto fijo específico
         @GetMapping("/{gastoFijoID}/gastos")
