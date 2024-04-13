@@ -56,7 +56,7 @@ public class GastoFijoController {
         // Agrega el valor del gasto al total actual del gasto fijo
         BigDecimal valorTotalActual = gastoFijo.getValorTotal();
         if (valorTotalActual == null) {
-            valorTotalActual = BigDecimal.ZERO;
+            valorTotalActual = BigDecimal.ZERO; 
         }
         BigDecimal nuevoValorTotal = valorTotalActual.add(gasto.getValorTotalGasto());
         gastoFijo.setValorTotal(nuevoValorTotal);
