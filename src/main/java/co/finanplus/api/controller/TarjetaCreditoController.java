@@ -11,7 +11,7 @@ import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjetaRepository;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCredito;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
 import java.math.BigDecimal;
-
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -36,6 +36,7 @@ public class TarjetaCreditoController {
     public ResponseEntity<TarjetaCredito> addTarjeta(@PathVariable String usuarioID,
             @RequestBody TarjetaCredito tarjeta) {
         tarjeta.setUsuarioID(usuarioID);
+        tarjeta.setFecha(LocalDate.now());
         TarjetaCredito savedTarjeta = tarjetaCreditoRepository.save(tarjeta);
         return new ResponseEntity<>(savedTarjeta, HttpStatus.CREATED);
     }
@@ -48,6 +49,7 @@ public class TarjetaCreditoController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Tarjeta de Crédito no encontrada con ID: " + tarjetaCreditoID));
         gasto.setTarjetaCredito(tarjeta);
+        gasto.setFecha(LocalDate.now());
 
         // Agrega el valor del gasto al total actual de la tarjeta de crédito
         BigDecimal valorTotalActual = tarjeta.getValorTotal();
@@ -57,8 +59,10 @@ public class TarjetaCreditoController {
         BigDecimal nuevoValorTotal = valorTotalActual.add(gasto.getValorTotalGasto());
         tarjeta.setValorTotal(nuevoValorTotal);
 
+
         // Guarda el gasto y actualiza la tarjeta de crédito
         GastoTarjeta savedGasto = gastoTarjetaRepository.save(gasto);
+
         tarjetaCreditoRepository.save(tarjeta); // Guarda la tarjeta de crédito con el nuevo valor total
 
         return new ResponseEntity<>(savedGasto, HttpStatus.CREATED);

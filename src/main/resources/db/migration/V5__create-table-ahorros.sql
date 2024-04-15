@@ -6,7 +6,8 @@ CREATE TABLE Ahorros (
     Meta DECIMAL(10, 2),
     Actual DECIMAL(10,2),
     tipo ENUM('Necesidad', 'Deseos', 'Metas') NOT NULL,
-    Fecha DATE,
+    Fecha_Insertado DATE,
+     Cerrado BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (UsuarioID) REFERENCES Usuarios(id)
   );
 

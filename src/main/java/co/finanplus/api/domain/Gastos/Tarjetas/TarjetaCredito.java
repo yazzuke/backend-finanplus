@@ -38,5 +38,9 @@ public class TarjetaCredito {
     @JsonManagedReference
     private List<GastoTarjeta> gastos;
 
+    @Column(name = "Fecha_Insertado")
+    private LocalDate fecha;
+
+
    
 }

@@ -4,6 +4,8 @@ CREATE TABLE GastosFijos (
   UsuarioID VARCHAR(100),
   Nombre_Gasto VARCHAR(255),
   Valor_Total DECIMAL(10, 2),
+  Fecha_Insertado DATE,
+  Cerrado BOOLEAN DEFAULT FALSE,
   FOREIGN KEY (UsuarioID) REFERENCES Usuarios(id)
 );
 
@@ -14,7 +16,8 @@ CREATE TABLE GastosFijosInv (
   Nombre_Gasto VARCHAR(255),
   Valor_Gasto INT,
   Fecha DATE,
-tipo ENUM('Necesidad', 'Deseos', 'Metas') NOT NULL,
-
+  tipo ENUM('Necesidad', 'Deseos', 'Metas') NOT NULL,
+  Fecha_Insertado DATE,
+  Cerrado BOOLEAN DEFAULT FALSE,
    FOREIGN KEY (Gasto_FijoID) REFERENCES GastosFijos(Gasto_FijoID)
 );

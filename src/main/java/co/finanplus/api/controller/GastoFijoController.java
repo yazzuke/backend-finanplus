@@ -16,6 +16,7 @@ import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCredito;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -40,6 +41,7 @@ public class GastoFijoController {
     public ResponseEntity<GastoFijo> addGastoFijo(@PathVariable String usuarioID,
             @RequestBody GastoFijo gastoFijo) {
         gastoFijo.setUsuarioID(usuarioID);
+        gastoFijo.setFecha(LocalDate.now());
         GastoFijo savedGastoFijo = gastoFijoRepository.save(gastoFijo);
         return new ResponseEntity<>(savedGastoFijo, HttpStatus.CREATED);
     }
@@ -52,6 +54,7 @@ public class GastoFijoController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
                          "Gasto Fijo no encontrado con ID: " + gastoFijoID));
         gasto.setGastoFijo(gastoFijo);
+        gasto.setFecha(LocalDate.now());
     
         // Agrega el valor del gasto al total actual del gasto fijo
         BigDecimal valorTotalActual = gastoFijo.getValorTotal();

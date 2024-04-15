@@ -1,6 +1,5 @@
 package co.finanplus.api.domain.Ahorros;
 
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -37,5 +36,8 @@ public class Ahorro {
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo")
     private TipoAhorro tipo;
+
+    @Column(name = "Fecha_Insertado")
+    private LocalDate fecha;
 
 }

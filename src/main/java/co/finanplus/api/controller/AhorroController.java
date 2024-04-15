@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import co.finanplus.api.domain.Ahorros.Ahorro;
 import co.finanplus.api.domain.Ahorros.AhorroRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -28,9 +29,26 @@ public class AhorroController {
     @PostMapping
     public ResponseEntity<Ahorro> addAhorro(@PathVariable String usuarioID, @RequestBody Ahorro ahorro) {
         ahorro.setUsuarioID(usuarioID);
+        ahorro.setFecha(LocalDate.now());
         Ahorro savedAhorro = ahorrosRepository.save(ahorro);
         return new ResponseEntity<>(savedAhorro, HttpStatus.CREATED);
     }
+
+    @GetMapping("/fecha")
+    public ResponseEntity<List<Ahorro>> listAhorrosByMonthAndYear(
+            @PathVariable String usuarioID,
+            @RequestParam int year,
+            @RequestParam int month) {
+
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        List<Ahorro> ahorros = ahorrosRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate, endDate);
+        return new ResponseEntity<>(ahorros, HttpStatus.OK);
+    }
+
+
+
 
     // Más métodos para actualizar y eliminar ahorros
 }

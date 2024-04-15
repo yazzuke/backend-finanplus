@@ -36,4 +36,8 @@ public class    GastoFijo {
     @OneToMany(mappedBy = "gastoFijo", cascade = CascadeType.ALL, orphanRemoval = true) // Aquí cambias "tarjetaCredito" por "gastoFijo" que es el nombre de la propiedad en GastoInvFijo que hace referencia a GastoFijo.
     @JsonManagedReference
     private List<GastoInvFijo> gastos; 
+
+    @Column(name = "Fecha_Insertado")
+    private LocalDate fecha;
+
 }

@@ -3,6 +3,7 @@
     UsuarioID VARCHAR(100),
     Concepto VARCHAR(255),
     Monto DECIMAL(10, 2),
-    Fecha DATE,
+    Fecha_Insertado DATE,
+    Cerrado BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (UsuarioID) REFERENCES Usuarios(id)
   );

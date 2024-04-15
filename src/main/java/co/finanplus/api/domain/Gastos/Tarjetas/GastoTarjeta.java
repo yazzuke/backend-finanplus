@@ -3,6 +3,8 @@ package co.finanplus.api.domain.Gastos.Tarjetas;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
@@ -38,7 +40,15 @@ public class GastoTarjeta {
     @Column(name = "tipo")
     private TipoGasto tipo;
 
+    @Column(name = "Fecha_Insertado")
+    private LocalDate fecha;
+
+
     public BigDecimal getValorTotalGasto() {
         return valorTotalGasto;
     }
+
+    
 }
+
+

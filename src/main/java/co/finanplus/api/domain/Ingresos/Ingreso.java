@@ -30,7 +30,7 @@ public class Ingreso {
     @Column(name = "Monto")
     private BigDecimal monto;
 
-    @Column(name = "Fecha")
+    @Column(name = "Fecha_Insertado")
     private LocalDate fecha;
 
 }

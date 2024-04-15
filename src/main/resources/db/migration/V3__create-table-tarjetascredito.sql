@@ -5,6 +5,8 @@ CREATE TABLE TarjetasCredito (
   Nombre_Tarjeta VARCHAR(255),
   Fecha_Pago DATE,
   Valor_Total DECIMAL(10, 2),
+  Fecha_Insertado DATE,
+   Cerrado BOOLEAN DEFAULT FALSE,
   FOREIGN KEY (UsuarioID) REFERENCES Usuarios(id)
 );
 
@@ -17,5 +19,7 @@ CREATE TABLE GastosTarjeta (
   Valor_Cuota_Gasto DECIMAL(10, 2),
   Valor_Total_Gasto DECIMAL(10, 2),
   tipo ENUM('Necesidad', 'Deseos', 'Metas') NOT NULL,
+  Fecha_Insertado DATE,
+   Cerrado BOOLEAN DEFAULT FALSE,
   FOREIGN KEY (TarjetaCreditoID) REFERENCES TarjetasCredito(TarjetaCreditoID)
 );
