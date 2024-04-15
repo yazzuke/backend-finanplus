@@ -59,7 +59,6 @@ public class TarjetaCreditoController {
         BigDecimal nuevoValorTotal = valorTotalActual.add(gasto.getValorTotalGasto());
         tarjeta.setValorTotal(nuevoValorTotal);
 
-
         // Guarda el gasto y actualiza la tarjeta de crédito
         GastoTarjeta savedGasto = gastoTarjetaRepository.save(gasto);
 
@@ -78,5 +77,42 @@ public class TarjetaCreditoController {
         return new ResponseEntity<>(gastos, HttpStatus.OK);
     }
 
-    // Más métodos para actualizar y eliminar tarjetas y gastos si es necesario
+    // endpoint para obtenerlo por fechas
+    @GetMapping("/fecha")
+    public ResponseEntity<List<TarjetaCredito>> listTarjetasByMonthAndYear(
+            @PathVariable String usuarioID,
+            @RequestParam int year,
+            @RequestParam int month) {
+
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        List<TarjetaCredito> tarjetas = tarjetaCreditoRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate,
+                endDate);
+        return new ResponseEntity<>(tarjetas, HttpStatus.OK);
+    }
+
+    @GetMapping("/{tarjetaCreditoID}/gastos/fecha")
+    public ResponseEntity<List<GastoTarjeta>> getGastosByTarjetaAndMonthAndYear(
+            @PathVariable String usuarioID,
+            @PathVariable Long tarjetaCreditoID,
+            @RequestParam int year,
+            @RequestParam int month) {
+
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        List<GastoTarjeta> gastos = gastoTarjetaRepository
+                .findByTarjetaCredito_TarjetaCreditoIDAndTarjetaCredito_UsuarioIDAndFechaBetween(
+                        tarjetaCreditoID,
+                        usuarioID,
+                        startDate,
+                        endDate);
+
+        if (gastos.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(gastos, HttpStatus.OK);
+    }
+
 }

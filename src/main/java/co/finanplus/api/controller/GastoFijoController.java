@@ -25,7 +25,7 @@ public class GastoFijoController {
 
     @Autowired
     private GastoFijoRepository gastoFijoRepository;
-    
+
     @Autowired
     private GastoInvFijoRepository gastoInvFijoRepository;
 
@@ -49,36 +49,74 @@ public class GastoFijoController {
     // endpoint para agregar los gastos a un gastofijo específico
     @PostMapping("/{gastoFijoID}/gastos")
     public ResponseEntity<GastoInvFijo> addGastoAFijo(@PathVariable Long gastoFijoID,
-                                                      @RequestBody GastoInvFijo gasto) {
+            @RequestBody GastoInvFijo gasto) {
         GastoFijo gastoFijo = gastoFijoRepository.findById(gastoFijoID)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, 
-                         "Gasto Fijo no encontrado con ID: " + gastoFijoID));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto Fijo no encontrado con ID: " + gastoFijoID));
         gasto.setGastoFijo(gastoFijo);
-        gasto.setFecha(LocalDate.now());
-    
+        gasto.setFechaInsertado(LocalDate.now());
+
         // Agrega el valor del gasto al total actual del gasto fijo
         BigDecimal valorTotalActual = gastoFijo.getValorTotal();
         if (valorTotalActual == null) {
-            valorTotalActual = BigDecimal.ZERO; 
+            valorTotalActual = BigDecimal.ZERO;
         }
         BigDecimal nuevoValorTotal = valorTotalActual.add(gasto.getValorTotalGasto());
         gastoFijo.setValorTotal(nuevoValorTotal);
-    
+
         // Guarda el gasto y actualiza el gasto fijo
         GastoInvFijo savedGasto = gastoInvFijoRepository.save(gasto);
         gastoFijoRepository.save(gastoFijo); // Guarda el gasto fijo con el nuevo valor total
-    
+
         return new ResponseEntity<>(savedGasto, HttpStatus.CREATED);
-    }  
-    
+    }
+
     // endpoint para obtener los gastos de un gasto fijo específico
-        @GetMapping("/{gastoFijoID}/gastos")
-        public ResponseEntity<List<GastoInvFijo>> getGastosByGastoFijo(@PathVariable Long gastoFijoID) {
-            List<GastoInvFijo> gastos = gastoInvFijoRepository.findByGastoFijo_GastoFijoID(gastoFijoID);
+    @GetMapping("/{gastoFijoID}/gastos")
+    public ResponseEntity<List<GastoInvFijo>> getGastosByGastoFijo(@PathVariable Long gastoFijoID) {
+        List<GastoInvFijo> gastos = gastoInvFijoRepository.findByGastoFijo_GastoFijoID(gastoFijoID);
+        if (gastos.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(gastos, HttpStatus.OK);
+    }
+
+    // endpoint para obtener los gastos generales por fecha
+    @GetMapping("/fecha")
+    public ResponseEntity<List<GastoFijo>> listGastosFijosByMonthAndYear(
+            @PathVariable String usuarioID,
+            @RequestParam int year,
+            @RequestParam int month) {
+
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        List<GastoFijo> gastosFijos = gastoFijoRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate, endDate);
+        return new ResponseEntity<>(gastosFijos, HttpStatus.OK);
+    }
+
+        // endpoint para obtener los gastos de un gasto fijo específico por fecha
+        @GetMapping("/{gastoFijoID}/gastos/fecha")
+        public ResponseEntity<List<GastoInvFijo>> getGastosByGastoFijoAndMonthAndYear(
+                @PathVariable String usuarioID,
+                @PathVariable Long gastoFijoID,
+                @RequestParam int year,
+                @RequestParam int month) {
+        
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        
+            List<GastoInvFijo> gastos = gastoInvFijoRepository
+                    .findByGastoFijo_GastoFijoIDAndGastoFijo_UsuarioIDAndFechaInsertadoBetween(
+                            gastoFijoID,
+                            usuarioID,
+                            startDate,
+                            endDate);
+        
             if (gastos.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
             return new ResponseEntity<>(gastos, HttpStatus.OK);
         }
 
-}
+    }
