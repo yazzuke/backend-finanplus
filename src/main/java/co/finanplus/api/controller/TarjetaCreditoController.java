@@ -10,6 +10,9 @@ import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjeta;
 import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjetaRepository;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCredito;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
+import co.finanplus.api.domain.Gastos.Tarjetas.TipoGasto;
+import co.finanplus.api.domain.Gastos.Tarjetas.TipoGastoRequest;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -92,6 +95,8 @@ public class TarjetaCreditoController {
         return new ResponseEntity<>(tarjetas, HttpStatus.OK);
     }
 
+    // endpoint para obtener los gastos de una tarjeta de crédito específica por
+    // fecha
     @GetMapping("/{tarjetaCreditoID}/gastos/fecha")
     public ResponseEntity<List<GastoTarjeta>> getGastosByTarjetaAndMonthAndYear(
             @PathVariable String usuarioID,
@@ -113,6 +118,25 @@ public class TarjetaCreditoController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(gastos, HttpStatus.OK);
+    }
+
+    // Este endpoint permite cambiar el tipo del gasto de una tarjeta de crédito.
+    @PatchMapping("/{tarjetaCreditoID}/gastos/{gastoID}/tipo")
+    public ResponseEntity<GastoTarjeta> updateGastoTarjetaTipo(
+            @PathVariable Long tarjetaCreditoID,
+            @PathVariable Long gastoID,
+            @RequestBody TipoGastoRequest tipoGastoRequest) {
+
+        GastoTarjeta gastoTarjeta = gastoTarjetaRepository.findById(gastoID)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Gasto Tarjeta no encontrado con ID: " + gastoID));
+
+        TipoGasto nuevoTipo = TipoGasto.valueOf(tipoGastoRequest.getTipo());
+        gastoTarjeta.setTipo(nuevoTipo);
+        GastoTarjeta updatedGastoTarjeta = gastoTarjetaRepository.save(gastoTarjeta);
+
+        return ResponseEntity.ok(updatedGastoTarjeta);
     }
 
 }

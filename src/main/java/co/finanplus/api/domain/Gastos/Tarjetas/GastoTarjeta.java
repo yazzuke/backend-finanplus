@@ -26,7 +26,7 @@ public class GastoTarjeta {
 
     @Column(name = "Nombre_Gasto")
     private String nombreGasto;
-
+    
     @Column(name = "Cuota_Gasto")
     private Integer cuotaGasto;
 

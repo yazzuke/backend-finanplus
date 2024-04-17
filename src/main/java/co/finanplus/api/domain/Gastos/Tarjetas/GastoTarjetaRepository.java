@@ -18,4 +18,5 @@ public interface GastoTarjetaRepository extends JpaRepository<GastoTarjeta, Long
         LocalDate startDate, 
         LocalDate endDate
     );
+    GastoTarjeta findByTarjetaCredito_TarjetaCreditoIDAndGastoID(Long tarjetaCreditoID, Long gastoID);
 }

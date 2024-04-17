@@ -33,7 +33,7 @@ public class    GastoFijo {
     @Column(name = "Valor_Total")
     private BigDecimal valorTotal = BigDecimal.ZERO;
 
-    @OneToMany(mappedBy = "gastoFijo", cascade = CascadeType.ALL, orphanRemoval = true) // Aquí cambias "tarjetaCredito" por "gastoFijo" que es el nombre de la propiedad en GastoInvFijo que hace referencia a GastoFijo.
+    @OneToMany(mappedBy = "gastoFijo", cascade = CascadeType.ALL, orphanRemoval = true) 
     @JsonManagedReference
     private List<GastoInvFijo> gastos; 
 

@@ -119,4 +119,8 @@ public class GastoFijoController {
             return new ResponseEntity<>(gastos, HttpStatus.OK);
         }
 
+
+        
+        
+
     }

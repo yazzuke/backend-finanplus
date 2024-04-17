@@ -37,7 +37,7 @@ public class GastoInvFijo {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo")
-    private TipoAhorro tipo;
+    private TipoFijo tipo;
 
 
     @Column(name = "Fecha_Insertado")
