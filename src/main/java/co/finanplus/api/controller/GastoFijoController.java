@@ -10,10 +10,13 @@ import co.finanplus.api.domain.Gastos.Fijos.GastoFijo;
 import co.finanplus.api.domain.Gastos.Fijos.GastoFijoRepository;
 import co.finanplus.api.domain.Gastos.Fijos.GastoInvFijo;
 import co.finanplus.api.domain.Gastos.Fijos.GastoInvFijoRepository;
+import co.finanplus.api.domain.Gastos.Fijos.TipoFijo;
+import co.finanplus.api.domain.Gastos.Fijos.TipoGastoRequest;
 import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjeta;
 import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjetaRepository;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCredito;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
+import co.finanplus.api.domain.Gastos.Tarjetas.TipoGasto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -119,8 +122,23 @@ public class GastoFijoController {
             return new ResponseEntity<>(gastos, HttpStatus.OK);
         }
 
-
+        // endpoint para actualizar el tipo de un gasto fijo
+        @PatchMapping("/{gastoFijoID}/gastos/{gastoID}/tipo")
+        public ResponseEntity<GastoInvFijo> updateGastoFijoTipo(
+                @PathVariable Long gastoFijoID,
+                @PathVariable Long gastoID,
+                @RequestBody TipoGastoRequest tipoGastoRequest) {
         
+            GastoInvFijo gastoInvFijo = gastoInvFijoRepository.findById(gastoID)
+                    .orElseThrow(() -> new ResponseStatusException(
+                            HttpStatus.NOT_FOUND,
+                            "Gasto Fijo no encontrado con ID: " + gastoID));
         
-
+            TipoFijo nuevoTipo = TipoFijo.valueOf(tipoGastoRequest.getTipo());
+            gastoInvFijo.setTipo(nuevoTipo);
+            GastoInvFijo updatedGastoFijo = gastoInvFijoRepository.save(gastoInvFijo);
+        
+            return ResponseEntity.ok(updatedGastoFijo);
+        }
+        
     }
