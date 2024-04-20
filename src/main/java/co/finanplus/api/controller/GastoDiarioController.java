@@ -90,17 +90,14 @@ public class GastoDiarioController {
             @PathVariable String usuarioID,
             @RequestParam int year,
             @RequestParam int month) {
-
+    
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-
-        List<GastoDiario> gastosDiario = gastoDiarioRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate,
-                endDate);
-        if (gastosDiario.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        return new ResponseEntity<>(gastosDiario, HttpStatus.OK);
+    
+        List<GastoDiario> gastosFijos = gastoDiarioRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate, endDate);
+        return new ResponseEntity<>(gastosFijos, HttpStatus.OK);
     }
+    
 
     // Endpoint to obtain individual expenses of a specific daily expense by month
     // and year

@@ -56,7 +56,7 @@ public class GastoVariableController {
         GastoVariable savedGastoVariable = gastoVariableRepository.save(gastoVariable);
         return new ResponseEntity<>(savedGastoVariable, HttpStatus.CREATED);
     }
-    
+
     // Agregar un gasto variable individual a un gasto variable específico
     @PostMapping("/{gastoVariableID}/gastos")
     public ResponseEntity<GastoVariableIndividual> addGastoVariableIndividual(
@@ -100,9 +100,6 @@ public class GastoVariableController {
 
         List<GastoVariable> gastosVariables = gastoVariableRepository.findByUsuarioIDAndFechaBetween(
                 usuarioID, startDate, endDate);
-        if (gastosVariables.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
         return new ResponseEntity<>(gastosVariables, HttpStatus.OK);
     }
 
