@@ -46,7 +46,33 @@ public class AhorroController {
         List<Ahorro> ahorros = ahorrosRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate, endDate);
         return new ResponseEntity<>(ahorros, HttpStatus.OK);
     }
+    // Endpoint para actualizar un ahorro existente
+            @PutMapping("/{ahorroID}")
+            public ResponseEntity<Ahorro> updateAhorro(@PathVariable String usuarioID, @PathVariable Long ahorroID, @RequestBody Ahorro ahorroDetails) {
+                Ahorro ahorro = ahorrosRepository.findById(ahorroID)
+                    .orElseThrow(() -> new RuntimeException("Ahorro no encontrado con ID: " + ahorroID));
 
+                // Actualiza solo los campos que pueden cambiar
+                ahorro.setConcepto(ahorroDetails.getConcepto());
+                ahorro.setMeta(ahorroDetails.getMeta());
+                ahorro.setActual(ahorroDetails.getActual());
+                ahorro.setTipo(ahorroDetails.getTipo());
+                
+                Ahorro updatedAhorro = ahorrosRepository.save(ahorro);
+                return new ResponseEntity<>(updatedAhorro, HttpStatus.OK);
+            }
+
+                        // Endpoint para eliminar un ahorro
+            @DeleteMapping("/{ahorroID}")
+            public ResponseEntity<?> deleteAhorro(@PathVariable String usuarioID, @PathVariable Long ahorroID) {
+                Ahorro ahorro = ahorrosRepository.findById(ahorroID)
+                    .orElseThrow(() -> new RuntimeException("Ahorro no encontrado con ID: " + ahorroID));
+
+                ahorrosRepository.delete(ahorro);
+                return ResponseEntity.noContent().build();
+            }
+
+    
 
 
 
