@@ -46,6 +46,30 @@ public class IngresoController {
         List<Ingreso> ingresos = ingresoRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate, endDate);
         return new ResponseEntity<>(ingresos, HttpStatus.OK);
     }
+   // Endpoint para actualizar un ingreso específico
+   @PutMapping("/{ingresoID}")
+   public ResponseEntity<Ingreso> updateIngreso(
+           @PathVariable String usuarioID,
+           @PathVariable Long ingresoID,
+           @RequestBody Ingreso ingresoDetails) {
+       return ingresoRepository.findById(ingresoID).map(ingreso -> {
+           ingreso.setConcepto(ingresoDetails.getConcepto());
+           ingreso.setMonto(ingresoDetails.getMonto());
+           // ... establecer cualquier otro campo que necesites actualizar
+           Ingreso updatedIngreso = ingresoRepository.save(ingreso);
+           return new ResponseEntity<>(updatedIngreso, HttpStatus.OK);
+       }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+   }
 
-    // Más métodos para actualizar y eliminar ingresos
+   // Endpoint para eliminar un ingreso específico
+   @DeleteMapping("/{ingresoID}")
+   public ResponseEntity<HttpStatus> deleteIngreso(
+           @PathVariable String usuarioID,
+           @PathVariable Long ingresoID) {
+       return ingresoRepository.findById(ingresoID).map(ingreso -> {
+           ingresoRepository.delete(ingreso);
+           return new ResponseEntity<HttpStatus>(HttpStatus.NO_CONTENT);
+       }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+   }
 }
+ 
