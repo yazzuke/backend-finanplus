@@ -2,8 +2,10 @@ package co.finanplus.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -90,14 +92,14 @@ public class GastoDiarioController {
             @PathVariable String usuarioID,
             @RequestParam int year,
             @RequestParam int month) {
-    
+
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-    
-        List<GastoDiario> gastosFijos = gastoDiarioRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate, endDate);
+
+        List<GastoDiario> gastosFijos = gastoDiarioRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate,
+                endDate);
         return new ResponseEntity<>(gastosFijos, HttpStatus.OK);
     }
-    
 
     // Endpoint to obtain individual expenses of a specific daily expense by month
     // and year
@@ -141,6 +143,40 @@ public class GastoDiarioController {
                 .save(gastoDiarioIndividual);
 
         return ResponseEntity.ok(updatedGastoDiarioIndividual);
+    }
+
+    @DeleteMapping("/{gastoDiarioID}/gastos/{gastoID}")
+    public ResponseEntity<Void> deleteGastoIndividual(@PathVariable Long gastoDiarioID, @PathVariable Long gastoID) {
+        GastoDiarioIndividual gasto = gastoDiarioIndividualRepository.findById(gastoID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto individual no encontrado con ID: " + gastoID));
+
+        gastoDiarioIndividualRepository.delete(gasto);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{gastoDiarioID}/gastos/{gastoID}")
+    public ResponseEntity<GastoDiarioIndividual> updateGastoIndividual(
+            @PathVariable Long gastoDiarioID,
+            @PathVariable Long gastoID,
+            @RequestBody GastoDiarioIndividual updateRequest) {
+
+        GastoDiarioIndividual gasto = gastoDiarioIndividualRepository.findById(gastoID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto individual no encontrado con ID: " + gastoID));
+
+        if (updateRequest.getNombreGasto() != null) {
+            gasto.setNombreGasto(updateRequest.getNombreGasto());
+        }
+        if (updateRequest.getValorGasto() != null) {
+            gasto.setValorGasto(updateRequest.getValorGasto());
+        }
+        if (updateRequest.getFecha() != null) {
+            gasto.setFecha(updateRequest.getFecha());
+        }
+
+        GastoDiarioIndividual updatedGasto = gastoDiarioIndividualRepository.save(gasto);
+        return ResponseEntity.ok(updatedGasto);
     }
 
 }
