@@ -98,47 +98,84 @@ public class GastoFijoController {
         return new ResponseEntity<>(gastosFijos, HttpStatus.OK);
     }
 
-        // endpoint para obtener los gastos de un gasto fijo específico por fecha
-        @GetMapping("/{gastoFijoID}/gastos/fecha")
-        public ResponseEntity<List<GastoInvFijo>> getGastosByGastoFijoAndMonthAndYear(
-                @PathVariable String usuarioID,
-                @PathVariable Long gastoFijoID,
-                @RequestParam int year,
-                @RequestParam int month) {
-        
-            LocalDate startDate = LocalDate.of(year, month, 1);
-            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-        
-            List<GastoInvFijo> gastos = gastoInvFijoRepository
-                    .findByGastoFijo_GastoFijoIDAndGastoFijo_UsuarioIDAndFechaInsertadoBetween(
-                            gastoFijoID,
-                            usuarioID,
-                            startDate,
-                            endDate);
-        
-            if (gastos.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-            }
-            return new ResponseEntity<>(gastos, HttpStatus.OK);
-        }
+    // endpoint para obtener los gastos de un gasto fijo específico por fecha
+    @GetMapping("/{gastoFijoID}/gastos/fecha")
+    public ResponseEntity<List<GastoInvFijo>> getGastosByGastoFijoAndMonthAndYear(
+            @PathVariable String usuarioID,
+            @PathVariable Long gastoFijoID,
+            @RequestParam int year,
+            @RequestParam int month) {
 
-        // endpoint para actualizar el tipo de un gasto fijo
-        @PatchMapping("/{gastoFijoID}/gastos/{gastoID}/tipo")
-        public ResponseEntity<GastoInvFijo> updateGastoFijoTipo(
-                @PathVariable Long gastoFijoID,
-                @PathVariable Long gastoID,
-                @RequestBody TipoGastoRequest tipoGastoRequest) {
-        
-            GastoInvFijo gastoInvFijo = gastoInvFijoRepository.findById(gastoID)
-                    .orElseThrow(() -> new ResponseStatusException(
-                            HttpStatus.NOT_FOUND,
-                            "Gasto Fijo no encontrado con ID: " + gastoID));
-        
-            TipoFijo nuevoTipo = TipoFijo.valueOf(tipoGastoRequest.getTipo());
-            gastoInvFijo.setTipo(nuevoTipo);
-            GastoInvFijo updatedGastoFijo = gastoInvFijoRepository.save(gastoInvFijo);
-        
-            return ResponseEntity.ok(updatedGastoFijo);
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        List<GastoInvFijo> gastos = gastoInvFijoRepository
+                .findByGastoFijo_GastoFijoIDAndGastoFijo_UsuarioIDAndFechaInsertadoBetween(
+                        gastoFijoID,
+                        usuarioID,
+                        startDate,
+                        endDate);
+
+        if (gastos.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        
+        return new ResponseEntity<>(gastos, HttpStatus.OK);
     }
+
+    // endpoint para actualizar el tipo de un gasto fijo
+    @PatchMapping("/{gastoFijoID}/gastos/{gastoID}/tipo")
+    public ResponseEntity<GastoInvFijo> updateGastoFijoTipo(
+            @PathVariable Long gastoFijoID,
+            @PathVariable Long gastoID,
+            @RequestBody TipoGastoRequest tipoGastoRequest) {
+
+        GastoInvFijo gastoInvFijo = gastoInvFijoRepository.findById(gastoID)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Gasto Fijo no encontrado con ID: " + gastoID));
+
+        TipoFijo nuevoTipo = TipoFijo.valueOf(tipoGastoRequest.getTipo());
+        gastoInvFijo.setTipo(nuevoTipo);
+        GastoInvFijo updatedGastoFijo = gastoInvFijoRepository.save(gastoInvFijo);
+
+        return ResponseEntity.ok(updatedGastoFijo);
+    }
+
+    // endpoint para eliminar un gasto fijo
+    @DeleteMapping("/{gastoFijoID}/gastos/{gastoInvFijoID}")
+    public ResponseEntity<Void> deleteGastoFijoIndividual(@PathVariable Long gastoFijoID,
+            @PathVariable Long gastoInvFijoID) {
+        GastoInvFijo gasto = gastoInvFijoRepository.findById(gastoInvFijoID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto fijo individual no encontrado con ID: " + gastoInvFijoID));
+
+        gastoInvFijoRepository.delete(gasto);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{gastoFijoID}/gastos/{gastoInvFijoID}")
+    public ResponseEntity<GastoInvFijo> updateGastoFijoIndividual(
+            @PathVariable Long gastoFijoID,
+            @PathVariable Long gastoInvFijoID,
+            @RequestBody GastoInvFijo updateRequest) {
+    
+        GastoInvFijo gasto = gastoInvFijoRepository.findById(gastoInvFijoID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto fijo individual no encontrado con ID: " + gastoInvFijoID));
+    
+        if (updateRequest.getNombreGasto() != null) {
+            gasto.setNombreGasto(updateRequest.getNombreGasto());
+        }
+        if (updateRequest.getValorGasto() != null) {
+            gasto.setValorGasto(updateRequest.getValorGasto());
+        }
+        if (updateRequest.getFechaInsertado() != null) {
+            gasto.setFechaInsertado(updateRequest.getFechaInsertado());
+        }
+    
+        GastoInvFijo updatedGasto = gastoInvFijoRepository.save(gasto);
+        return ResponseEntity.ok(updatedGasto);
+    }
+    
+
+}

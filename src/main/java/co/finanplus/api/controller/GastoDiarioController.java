@@ -145,38 +145,38 @@ public class GastoDiarioController {
         return ResponseEntity.ok(updatedGastoDiarioIndividual);
     }
 
-    @DeleteMapping("/{gastoDiarioID}/gastos/{gastoID}")
-    public ResponseEntity<Void> deleteGastoIndividual(@PathVariable Long gastoDiarioID, @PathVariable Long gastoID) {
-        GastoDiarioIndividual gasto = gastoDiarioIndividualRepository.findById(gastoID)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Gasto individual no encontrado con ID: " + gastoID));
+        @DeleteMapping("/{gastoDiarioID}/gastos/{gastoID}")
+        public ResponseEntity<Void> deleteGastoIndividual(@PathVariable Long gastoDiarioID, @PathVariable Long gastoID) {
+            GastoDiarioIndividual gasto = gastoDiarioIndividualRepository.findById(gastoID)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Gasto individual no encontrado con ID: " + gastoID));
 
-        gastoDiarioIndividualRepository.delete(gasto);
-        return ResponseEntity.ok().build();
-    }
-
-    @PatchMapping("/{gastoDiarioID}/gastos/{gastoID}")
-    public ResponseEntity<GastoDiarioIndividual> updateGastoIndividual(
-            @PathVariable Long gastoDiarioID,
-            @PathVariable Long gastoID,
-            @RequestBody GastoDiarioIndividual updateRequest) {
-
-        GastoDiarioIndividual gasto = gastoDiarioIndividualRepository.findById(gastoID)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Gasto individual no encontrado con ID: " + gastoID));
-
-        if (updateRequest.getNombreGasto() != null) {
-            gasto.setNombreGasto(updateRequest.getNombreGasto());
-        }
-        if (updateRequest.getValorGasto() != null) {
-            gasto.setValorGasto(updateRequest.getValorGasto());
-        }
-        if (updateRequest.getFecha() != null) {
-            gasto.setFecha(updateRequest.getFecha());
+            gastoDiarioIndividualRepository.delete(gasto);
+            return ResponseEntity.ok().build();
         }
 
-        GastoDiarioIndividual updatedGasto = gastoDiarioIndividualRepository.save(gasto);
-        return ResponseEntity.ok(updatedGasto);
-    }
+        @PatchMapping("/{gastoDiarioID}/gastos/{gastoID}")
+        public ResponseEntity<GastoDiarioIndividual> updateGastoIndividual(
+                @PathVariable Long gastoDiarioID,
+                @PathVariable Long gastoID,
+                @RequestBody GastoDiarioIndividual updateRequest) {
+
+            GastoDiarioIndividual gasto = gastoDiarioIndividualRepository.findById(gastoID)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "Gasto individual no encontrado con ID: " + gastoID));
+
+            if (updateRequest.getNombreGasto() != null) {
+                gasto.setNombreGasto(updateRequest.getNombreGasto());
+            }
+            if (updateRequest.getValorGasto() != null) {
+                gasto.setValorGasto(updateRequest.getValorGasto());
+            }
+            if (updateRequest.getFecha() != null) {
+                gasto.setFecha(updateRequest.getFecha());
+            }
+
+            GastoDiarioIndividual updatedGasto = gastoDiarioIndividualRepository.save(gasto);
+            return ResponseEntity.ok(updatedGasto);
+        }
 
 }
