@@ -24,6 +24,9 @@ public class GastoVariableIndividual {
     @JoinColumn(name = "Gasto_VariableID")
     @JsonBackReference
     private GastoVariable gastoVariable;
+    
+    @Column(name = "IngresoID")
+    private Long ingresoID;
 
     @Column(name = "Nombre_Gasto")
     private String nombreGasto;

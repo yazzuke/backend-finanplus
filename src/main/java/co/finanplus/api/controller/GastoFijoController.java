@@ -158,24 +158,27 @@ public class GastoFijoController {
             @PathVariable Long gastoFijoID,
             @PathVariable Long gastoInvFijoID,
             @RequestBody GastoInvFijo updateRequest) {
-    
+
         GastoInvFijo gasto = gastoInvFijoRepository.findById(gastoInvFijoID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Gasto fijo individual no encontrado con ID: " + gastoInvFijoID));
-    
+
         if (updateRequest.getNombreGasto() != null) {
             gasto.setNombreGasto(updateRequest.getNombreGasto());
         }
         if (updateRequest.getValorGasto() != null) {
             gasto.setValorGasto(updateRequest.getValorGasto());
         }
-        if (updateRequest.getFechaInsertado() != null) {
-            gasto.setFechaInsertado(updateRequest.getFechaInsertado());
+        if (updateRequest.getFecha() != null) {
+            gasto.setFecha(updateRequest.getFecha());
         }
-    
+
         GastoInvFijo updatedGasto = gastoInvFijoRepository.save(gasto);
         return ResponseEntity.ok(updatedGasto);
     }
-    
+
+
+
+        
 
 }

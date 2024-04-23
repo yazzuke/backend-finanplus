@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -143,5 +144,43 @@ public class GastoVariableController {
 
         return ResponseEntity.ok(updatedGastoVariableIndividual);
     }
+
+    // Endpoint para eliminar un gasto variable individual
+    @DeleteMapping("/{gastoVariableID}/gastos/{gastoIndividualID}")
+    public ResponseEntity<Void> deleteGastoVariableIndividual(@PathVariable Long gastoVariableID,
+            @PathVariable Long gastoIndividualID) {
+        GastoVariableIndividual gastoIndividual = gastoVariableIndividualRepository.findById(gastoIndividualID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto Variable Individual no encontrado con ID: " + gastoIndividualID));
+
+        gastoVariableIndividualRepository.delete(gastoIndividual);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{gastoVariableID}/gastos/{gastoIndividualID}")
+public ResponseEntity<GastoVariableIndividual> updateGastoVariableIndividual(
+        @PathVariable Long gastoVariableID,
+        @PathVariable Long gastoIndividualID,
+        @RequestBody GastoVariableIndividual updateRequest) {
+
+    GastoVariableIndividual gastoIndividual = gastoVariableIndividualRepository.findById(gastoIndividualID)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Gasto Variable Individual no encontrado con ID: " + gastoIndividualID));
+
+    if (updateRequest.getNombreGasto() != null) {
+        gastoIndividual.setNombreGasto(updateRequest.getNombreGasto());
+    }
+    if (updateRequest.getValorGasto() != null) {
+        gastoIndividual.setValorGasto(updateRequest.getValorGasto());
+    }
+    if (updateRequest.getFecha() != null) {
+        gastoIndividual.setFecha(updateRequest.getFecha());
+    }
+
+    GastoVariableIndividual updatedGastoIndividual = gastoVariableIndividualRepository.save(gastoIndividual);
+    return ResponseEntity.ok(updatedGastoIndividual);
+}
+
+
 
 }

@@ -11,6 +11,7 @@ CREATE TABLE GastosVariables (
 -- Comando para crear la tabla GastosTarjeta
 CREATE TABLE GastosVariablesIndividuales (
   GastoID INT AUTO_INCREMENT PRIMARY KEY,
+  IngresoID INT,
   Gasto_VariableID INT,
   Nombre_Gasto VARCHAR(255),
   Valor_Gasto INT,
@@ -18,6 +19,8 @@ CREATE TABLE GastosVariablesIndividuales (
   tipo ENUM('Necesidad', 'Deseos', 'Metas') NOT NULL,
   Fecha_Insertado DATE,
   Cerrado BOOLEAN DEFAULT FALSE,
-   FOREIGN KEY (Gasto_VariableID) REFERENCES GastosVariables(Gasto_VariableID)
+  FOREIGN KEY (Gasto_VariableID) REFERENCES GastosVariables(Gasto_VariableID),
+  Pagado BOOLEAN DEFAULT FALSE,
+  FOREIGN KEY (IngresoID) REFERENCES ingresos(IngresoID)
 );
   

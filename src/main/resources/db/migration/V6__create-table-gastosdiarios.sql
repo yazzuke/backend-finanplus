@@ -11,6 +11,7 @@ CREATE TABLE GastosDiarios (
 -- Comando para crear la tabla GastosTarjeta
 CREATE TABLE GastosDiariosIndividuales (
   GastoID INT AUTO_INCREMENT PRIMARY KEY,
+  IngresoID INT,
   Gasto_DiarioID INT,
   Nombre_Gasto VARCHAR(255),
   Valor_Gasto INT,
@@ -18,5 +19,7 @@ CREATE TABLE GastosDiariosIndividuales (
   tipo ENUM('Necesidad', 'Deseos', 'Metas') NOT NULL,
   Fecha_Insertado DATE,
   Cerrado BOOLEAN DEFAULT FALSE,
-   FOREIGN KEY (Gasto_DiarioID) REFERENCES GastosDiarios(Gasto_DiarioID)
+  Pagado BOOLEAN DEFAULT FALSE,
+  FOREIGN KEY (Gasto_DiarioID) REFERENCES GastosDiarios(Gasto_DiarioID),
+  FOREIGN KEY (IngresoID) REFERENCES ingresos(IngresoID)
 );

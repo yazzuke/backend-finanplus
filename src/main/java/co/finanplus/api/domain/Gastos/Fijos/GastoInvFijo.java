@@ -26,6 +26,9 @@ public class GastoInvFijo {
     @JsonBackReference
     private GastoFijo gastoFijo;
 
+    @Column(name = "IngresoID")
+    private Long ingresoID;
+
     @Column(name = "Nombre_Gasto")
     private String nombreGasto;
 

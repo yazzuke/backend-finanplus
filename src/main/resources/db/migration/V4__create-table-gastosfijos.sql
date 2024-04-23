@@ -12,12 +12,15 @@ CREATE TABLE GastosFijos (
 -- Comando para crear la tabla GastosTarjeta
 CREATE TABLE GastosFijosInv (
   GastoID INT AUTO_INCREMENT PRIMARY KEY,
+  IngresoID INT,
   Gasto_FijoID INT,
   Nombre_Gasto VARCHAR(255),
   Valor_Gasto INT,
   Fecha DATE,
   tipo ENUM('Necesidad', 'Deseos', 'Metas') NOT NULL,
   Fecha_Insertado DATE,
+  Pagado BOOLEAN DEFAULT FALSE,
   Cerrado BOOLEAN DEFAULT FALSE,
-   FOREIGN KEY (Gasto_FijoID) REFERENCES GastosFijos(Gasto_FijoID)
+   FOREIGN KEY (Gasto_FijoID) REFERENCES GastosFijos(Gasto_FijoID),
+   FOREIGN KEY (IngresoID) REFERENCES ingresos(IngresoID)
 );
