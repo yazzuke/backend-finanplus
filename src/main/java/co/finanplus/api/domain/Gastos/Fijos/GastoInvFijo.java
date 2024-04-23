@@ -42,9 +42,11 @@ public class GastoInvFijo {
     @Column(name = "tipo")
     private TipoFijo tipo;
 
-
     @Column(name = "Fecha_Insertado")
     private LocalDate fechaInsertado;
+
+    @Column(name = "Pagado")
+    private Boolean pagado;
 
     public BigDecimal getValorTotalGasto() {
         return valorGasto;

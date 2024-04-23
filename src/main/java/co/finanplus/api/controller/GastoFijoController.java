@@ -21,6 +21,7 @@ import co.finanplus.api.domain.Gastos.Tarjetas.TipoGasto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/usuarios/{usuarioID}/gastosfijos")
@@ -153,6 +154,7 @@ public class GastoFijoController {
         return ResponseEntity.ok().build();
     }
 
+    // endpoint para actualizar un gasto fijo
     @PatchMapping("/{gastoFijoID}/gastos/{gastoInvFijoID}")
     public ResponseEntity<GastoInvFijo> updateGastoFijoIndividual(
             @PathVariable Long gastoFijoID,
@@ -177,8 +179,21 @@ public class GastoFijoController {
         return ResponseEntity.ok(updatedGasto);
     }
 
-
-
-        
+    // endpoint para actualizar el estado de pago de un gasto fijo
+    @PatchMapping("/{gastoFijoID}/gastos/{gastoID}/pagado")
+    public ResponseEntity<GastoInvFijo> updateGastoPagado(
+            @PathVariable Long gastoFijoID,
+            @PathVariable Long gastoID,
+            @RequestBody Map<String, Boolean> pago) {
+        GastoInvFijo gasto = gastoInvFijoRepository.findById(gastoID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto no encontrado con ID: " + gastoID));
+    
+        Boolean isPagado = pago.get("pagado");
+        gasto.setPagado(isPagado);
+        GastoInvFijo updatedGasto = gastoInvFijoRepository.save(gasto);
+        return ResponseEntity.ok(updatedGasto);
+    }
+    
 
 }

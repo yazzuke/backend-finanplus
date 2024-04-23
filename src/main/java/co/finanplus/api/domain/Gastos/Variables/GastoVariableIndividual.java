@@ -44,6 +44,10 @@ public class GastoVariableIndividual {
     @Column(name = "Fecha_Insertado")
     private LocalDate fechaInsertado;
 
+    @Column(name = "Pagado")
+    private Boolean pagado;
+
+
     public BigDecimal getValorTotalGasto() {
         return valorGasto;
     }

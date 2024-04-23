@@ -18,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import co.finanplus.api.domain.Gastos.Diario.GastoDiario;
 import co.finanplus.api.domain.Gastos.Diario.GastoDiarioIndividual;
@@ -158,29 +159,47 @@ public class GastoVariableController {
     }
 
     @PatchMapping("/{gastoVariableID}/gastos/{gastoIndividualID}")
-public ResponseEntity<GastoVariableIndividual> updateGastoVariableIndividual(
-        @PathVariable Long gastoVariableID,
-        @PathVariable Long gastoIndividualID,
-        @RequestBody GastoVariableIndividual updateRequest) {
+    public ResponseEntity<GastoVariableIndividual> updateGastoVariableIndividual(
+            @PathVariable Long gastoVariableID,
+            @PathVariable Long gastoIndividualID,
+            @RequestBody GastoVariableIndividual updateRequest) {
 
-    GastoVariableIndividual gastoIndividual = gastoVariableIndividualRepository.findById(gastoIndividualID)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Gasto Variable Individual no encontrado con ID: " + gastoIndividualID));
+        GastoVariableIndividual gastoIndividual = gastoVariableIndividualRepository.findById(gastoIndividualID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto Variable Individual no encontrado con ID: " + gastoIndividualID));
 
-    if (updateRequest.getNombreGasto() != null) {
-        gastoIndividual.setNombreGasto(updateRequest.getNombreGasto());
+        if (updateRequest.getNombreGasto() != null) {
+            gastoIndividual.setNombreGasto(updateRequest.getNombreGasto());
+        }
+        if (updateRequest.getValorGasto() != null) {
+            gastoIndividual.setValorGasto(updateRequest.getValorGasto());
+        }
+        if (updateRequest.getFecha() != null) {
+            gastoIndividual.setFecha(updateRequest.getFecha());
+        }
+
+        GastoVariableIndividual updatedGastoIndividual = gastoVariableIndividualRepository.save(gastoIndividual);
+        return ResponseEntity.ok(updatedGastoIndividual);
     }
-    if (updateRequest.getValorGasto() != null) {
-        gastoIndividual.setValorGasto(updateRequest.getValorGasto());
+
+    // Endpoint para actualizar el estado de pago de un gasto variable individual
+    @PatchMapping("/{gastoVariableID}/gastos/{gastoIndividualID}/pagado")
+    public ResponseEntity<GastoVariableIndividual> updateGastoVariablePagado(
+            @PathVariable Long gastoVariableID,
+            @PathVariable Long gastoIndividualID,
+            @RequestBody Map<String, Boolean> pagadoStatus) {
+
+        GastoVariableIndividual gastoIndividual = gastoVariableIndividualRepository.findById(gastoIndividualID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto Variable Individual no encontrado con ID: " + gastoIndividualID));
+
+        Boolean isPagado = pagadoStatus.get("pagado");
+        if (isPagado == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Estado de 'pagado' no proporcionado");
+        }
+        gastoIndividual.setPagado(isPagado);
+        GastoVariableIndividual updatedGastoIndividual = gastoVariableIndividualRepository.save(gastoIndividual);
+        return ResponseEntity.ok(updatedGastoIndividual);
     }
-    if (updateRequest.getFecha() != null) {
-        gastoIndividual.setFecha(updateRequest.getFecha());
-    }
-
-    GastoVariableIndividual updatedGastoIndividual = gastoVariableIndividualRepository.save(gastoIndividual);
-    return ResponseEntity.ok(updatedGastoIndividual);
-}
-
-
 
 }
