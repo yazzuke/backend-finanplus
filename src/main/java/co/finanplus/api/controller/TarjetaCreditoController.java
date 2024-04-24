@@ -14,6 +14,7 @@ import co.finanplus.api.domain.Gastos.Tarjetas.TipoGasto;
 import co.finanplus.api.domain.Gastos.Tarjetas.TipoGastoRequest;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -52,7 +53,14 @@ public class TarjetaCreditoController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Tarjeta de Crédito no encontrada con ID: " + tarjetaCreditoID));
         gasto.setTarjetaCredito(tarjeta);
+        gasto.setCuotaActual(1); // Inicializa la cuota actual en 1
         gasto.setFecha(LocalDate.now());
+
+        if (gasto.getCuotaTotal() != null && gasto.getValorTotalGasto() != null) {
+            BigDecimal cuota = gasto.getValorTotalGasto()
+                    .divide(BigDecimal.valueOf(gasto.getCuotaTotal()), 2, RoundingMode.HALF_UP);
+            gasto.setValorCuotaGasto(cuota);
+        }
 
         // Agrega el valor del gasto al total actual de la tarjeta de crédito
         BigDecimal valorTotalActual = tarjeta.getValorTotal();
@@ -118,6 +126,71 @@ public class TarjetaCreditoController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(gastos, HttpStatus.OK);
+    }
+
+    // endpoint para borra un gasto de una tarjeta de crédito
+    @DeleteMapping("/{tarjetaCreditoID}/gastos/{gastoID}")
+    public ResponseEntity<Void> deleteGastoTarjeta(@PathVariable Long tarjetaCreditoID,
+            @PathVariable Long gastoID) {
+        GastoTarjeta gastoTarjeta = gastoTarjetaRepository.findById(gastoID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto de tarjeta no encontrado con ID: " + gastoID));
+
+        // Actualizar el valor total de la tarjeta de crédito
+        TarjetaCredito tarjeta = gastoTarjeta.getTarjetaCredito();
+        tarjeta.setValorTotal(tarjeta.getValorTotal().subtract(gastoTarjeta.getValorTotalGasto()));
+        tarjetaCreditoRepository.save(tarjeta);
+
+        gastoTarjetaRepository.delete(gastoTarjeta);
+        return ResponseEntity.ok().build();
+    }
+
+    // endpoint para actualizar un gasto de una tarjeta de crédito
+    @PatchMapping("/{tarjetaCreditoID}/gastos/{gastoID}")
+    public ResponseEntity<GastoTarjeta> updateGastoTarjeta(@PathVariable Long tarjetaCreditoID,
+            @PathVariable Long gastoID,
+            @RequestBody GastoTarjeta updateRequest) {
+
+        GastoTarjeta gastoTarjeta = gastoTarjetaRepository.findById(gastoID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto de tarjeta no encontrado con ID: " + gastoID));
+
+        // Restar el viejo valor del gasto del valor total de la tarjeta antes de actualizar
+        TarjetaCredito tarjeta = gastoTarjeta.getTarjetaCredito();
+        tarjeta.setValorTotal(tarjeta.getValorTotal().subtract(gastoTarjeta.getValorTotalGasto()));
+                
+
+        boolean debeRecalcularCuota = false;
+
+        if (updateRequest.getNombreGasto() != null) {
+            gastoTarjeta.setNombreGasto(updateRequest.getNombreGasto());
+        }
+
+        if (updateRequest.getValorTotalGasto() != null &&
+                !updateRequest.getValorTotalGasto().equals(gastoTarjeta.getValorTotalGasto())) {
+            gastoTarjeta.setValorTotalGasto(updateRequest.getValorTotalGasto());
+            debeRecalcularCuota = true;
+        }
+
+        if (updateRequest.getCuotaTotal() != null &&
+                !updateRequest.getCuotaTotal().equals(gastoTarjeta.getCuotaTotal())) {
+            gastoTarjeta.setCuotaTotal(updateRequest.getCuotaTotal());
+            debeRecalcularCuota = true;
+        }
+
+        // Si hay cambios que requieran recalcular el valor de la cuota, hacerlo aquí
+        if (debeRecalcularCuota) {
+            BigDecimal valorCuota = gastoTarjeta.getValorTotalGasto()
+                    .divide(new BigDecimal(gastoTarjeta.getCuotaTotal()), 2, RoundingMode.HALF_UP);
+            gastoTarjeta.setValorCuotaGasto(valorCuota);
+        }
+
+        tarjeta.setValorTotal(tarjeta.getValorTotal().add(gastoTarjeta.getValorTotalGasto()));
+        tarjetaCreditoRepository.save(tarjeta);
+    
+
+        GastoTarjeta updatedGastoTarjeta = gastoTarjetaRepository.save(gastoTarjeta);
+        return ResponseEntity.ok(updatedGastoTarjeta);
     }
 
     // Este endpoint permite cambiar el tipo del gasto de una tarjeta de crédito.

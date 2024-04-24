@@ -145,38 +145,49 @@ public class GastoDiarioController {
         return ResponseEntity.ok(updatedGastoDiarioIndividual);
     }
 
-        @DeleteMapping("/{gastoDiarioID}/gastos/{gastoID}")
-        public ResponseEntity<Void> deleteGastoIndividual(@PathVariable Long gastoDiarioID, @PathVariable Long gastoID) {
-            GastoDiarioIndividual gasto = gastoDiarioIndividualRepository.findById(gastoID)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Gasto individual no encontrado con ID: " + gastoID));
+    // Endpoint to delete an individual daily expense
+    @DeleteMapping("/{gastoDiarioID}/gastos/{gastoID}")
+    public ResponseEntity<Void> deleteGastoIndividual(@PathVariable Long gastoDiarioID, @PathVariable Long gastoID) {
+        GastoDiarioIndividual gasto = gastoDiarioIndividualRepository.findById(gastoID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto individual no encontrado con ID: " + gastoID));
 
-            gastoDiarioIndividualRepository.delete(gasto);
-            return ResponseEntity.ok().build();
+        GastoDiario gastoDiario = gasto.getGastoDiario();
+        gastoDiario.setValorTotal(gastoDiario.getValorTotal().subtract(gasto.getValorTotalGasto()));
+        gastoDiarioRepository.save(gastoDiario); // Guarda el gasto diario con el nuevo valor total
+
+        gastoDiarioIndividualRepository.delete(gasto); // Elimina el gasto individual
+        return ResponseEntity.ok().build();
+    }
+
+    // Endpoint to update an individual daily expense
+    @PatchMapping("/{gastoDiarioID}/gastos/{gastoID}")
+    public ResponseEntity<GastoDiarioIndividual> updateGastoIndividual(
+            @PathVariable Long gastoDiarioID,
+            @PathVariable Long gastoID,
+            @RequestBody GastoDiarioIndividual updateRequest) {
+    
+        GastoDiarioIndividual gasto = gastoDiarioIndividualRepository.findById(gastoID)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Gasto individual no encontrado con ID: " + gastoID));
+    
+        BigDecimal valorAntiguo = gasto.getValorTotalGasto();
+    
+        // Actualizar los campos necesarios
+        if (updateRequest.getValorGasto() != null) {
+            gasto.setValorGasto(updateRequest.getValorGasto());
+            // Si se actualiza el valor del gasto, recalcular el valor total del gasto diario
+            GastoDiario gastoDiario = gasto.getGastoDiario();
+            BigDecimal valorTotalActual = gastoDiario.getValorTotal();
+            BigDecimal valorNuevo = updateRequest.getValorGasto();
+            BigDecimal valorTotalNuevo = valorTotalActual.subtract(valorAntiguo).add(valorNuevo);
+            gastoDiario.setValorTotal(valorTotalNuevo);
+            gastoDiarioRepository.save(gastoDiario);
         }
-
-        @PatchMapping("/{gastoDiarioID}/gastos/{gastoID}")
-        public ResponseEntity<GastoDiarioIndividual> updateGastoIndividual(
-                @PathVariable Long gastoDiarioID,
-                @PathVariable Long gastoID,
-                @RequestBody GastoDiarioIndividual updateRequest) {
-
-            GastoDiarioIndividual gasto = gastoDiarioIndividualRepository.findById(gastoID)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                            "Gasto individual no encontrado con ID: " + gastoID));
-
-            if (updateRequest.getNombreGasto() != null) {
-                gasto.setNombreGasto(updateRequest.getNombreGasto());
-            }
-            if (updateRequest.getValorGasto() != null) {
-                gasto.setValorGasto(updateRequest.getValorGasto());
-            }
-            if (updateRequest.getFecha() != null) {
-                gasto.setFecha(updateRequest.getFecha());
-            }
-
-            GastoDiarioIndividual updatedGasto = gastoDiarioIndividualRepository.save(gasto);
-            return ResponseEntity.ok(updatedGasto);
-        }
-
+       
+    
+        GastoDiarioIndividual updatedGasto = gastoDiarioIndividualRepository.save(gasto);
+        return ResponseEntity.ok(updatedGasto);
+    }
+    
 }

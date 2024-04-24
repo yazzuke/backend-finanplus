@@ -27,8 +27,12 @@ public class GastoTarjeta {
     @Column(name = "Nombre_Gasto")
     private String nombreGasto;
     
-    @Column(name = "Cuota_Gasto")
-    private Integer cuotaGasto;
+    @Column(name = "Cuota_Total")
+    private Integer cuotaTotal;
+    
+    @Column(name = "Cuota_Actual")
+    private Integer cuotaActual;
+
 
     @Column(name = "Valor_Cuota_Gasto")
     private BigDecimal valorCuotaGasto;

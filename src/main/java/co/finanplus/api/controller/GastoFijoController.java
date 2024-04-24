@@ -149,36 +149,44 @@ public class GastoFijoController {
         GastoInvFijo gasto = gastoInvFijoRepository.findById(gastoInvFijoID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Gasto fijo individual no encontrado con ID: " + gastoInvFijoID));
-
+    
+        GastoFijo gastoFijo = gasto.getGastoFijo();
+        gastoFijo.setValorTotal(gastoFijo.getValorTotal().subtract(gasto.getValorTotalGasto()));
+        gastoFijoRepository.save(gastoFijo); // Actualiza el gasto fijo con el nuevo valor total
+    
         gastoInvFijoRepository.delete(gasto);
         return ResponseEntity.ok().build();
     }
-
+    
     // endpoint para actualizar un gasto fijo
     @PatchMapping("/{gastoFijoID}/gastos/{gastoInvFijoID}")
     public ResponseEntity<GastoInvFijo> updateGastoFijoIndividual(
             @PathVariable Long gastoFijoID,
             @PathVariable Long gastoInvFijoID,
             @RequestBody GastoInvFijo updateRequest) {
-
+    
         GastoInvFijo gasto = gastoInvFijoRepository.findById(gastoInvFijoID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Gasto fijo individual no encontrado con ID: " + gastoInvFijoID));
-
-        if (updateRequest.getNombreGasto() != null) {
-            gasto.setNombreGasto(updateRequest.getNombreGasto());
-        }
+    
+        BigDecimal originalValorGasto = gasto.getValorTotalGasto();
+        GastoFijo gastoFijo = gasto.getGastoFijo();
+    
         if (updateRequest.getValorGasto() != null) {
+            // Si hay cambios en el valor del gasto, calcular la diferencia y actualizar
+            BigDecimal diferencia = updateRequest.getValorGasto().subtract(originalValorGasto);
             gasto.setValorGasto(updateRequest.getValorGasto());
+            gastoFijo.setValorTotal(gastoFijo.getValorTotal().add(diferencia));
         }
-        if (updateRequest.getFecha() != null) {
-            gasto.setFecha(updateRequest.getFecha());
-        }
-
-        GastoInvFijo updatedGasto = gastoInvFijoRepository.save(gasto);
-        return ResponseEntity.ok(updatedGasto);
+    
+        // Actualizar otros campos si es necesario...
+        
+        gastoInvFijoRepository.save(gasto);
+        gastoFijoRepository.save(gastoFijo); // Guarda el gasto fijo actualizado
+    
+        return ResponseEntity.ok(gasto);
     }
-
+    
     // endpoint para actualizar el estado de pago de un gasto fijo
     @PatchMapping("/{gastoFijoID}/gastos/{gastoID}/pagado")
     public ResponseEntity<GastoInvFijo> updateGastoPagado(
