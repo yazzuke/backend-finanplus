@@ -19,6 +19,14 @@ public class IngresoController {
     @Autowired
     private IngresoRepository ingresoRepository;
 
+    
+    private final IngresoService ingresoService;
+
+    @Autowired
+    public IngresoController(IngresoService ingresoService) {
+        this.ingresoService = ingresoService;
+    }
+
   
 
     // endpoint para obtener los ingresos de un usuario
@@ -33,7 +41,7 @@ public class IngresoController {
     public ResponseEntity<Ingreso> addIngreso(@PathVariable String usuarioID, @RequestBody Ingreso ingreso) {
         ingreso.setUsuarioID(usuarioID);
         ingreso.setFecha(LocalDate.now());
-        Ingreso savedIngreso = ingresoRepository.save(ingreso);
+        Ingreso savedIngreso = ingresoService.agregarIngreso(ingreso);
         return new ResponseEntity<>(savedIngreso, HttpStatus.CREATED);
     }
 
@@ -55,13 +63,12 @@ public class IngresoController {
            @PathVariable String usuarioID,
            @PathVariable Long ingresoID,
            @RequestBody Ingreso ingresoDetails) {
-       return ingresoRepository.findById(ingresoID).map(ingreso -> {
-           ingreso.setConcepto(ingresoDetails.getConcepto());
-           ingreso.setMonto(ingresoDetails.getMonto());
-           // ... establecer cualquier otro campo que necesites actualizar
-           Ingreso updatedIngreso = ingresoRepository.save(ingreso);
+       Ingreso updatedIngreso = ingresoService.actualizarIngreso(ingresoID, ingresoDetails);
+       if (updatedIngreso != null) {
            return new ResponseEntity<>(updatedIngreso, HttpStatus.OK);
-       }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+       } else {
+           return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+       }
    }
 
    // Endpoint para eliminar un ingreso específico
@@ -69,10 +76,11 @@ public class IngresoController {
    public ResponseEntity<HttpStatus> deleteIngreso(
            @PathVariable String usuarioID,
            @PathVariable Long ingresoID) {
-       return ingresoRepository.findById(ingresoID).map(ingreso -> {
-           ingresoRepository.delete(ingreso);
-           return new ResponseEntity<HttpStatus>(HttpStatus.NO_CONTENT);
-       }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+       boolean isDeleted = ingresoService.eliminarIngreso(ingresoID);
+       if (isDeleted) {
+           return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+       } else {
+           return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+       }
    }
 }
- 

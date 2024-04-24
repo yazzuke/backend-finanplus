@@ -18,5 +18,29 @@ public class IngresoService {
         this.resumenMensualService = resumenMensualService;
     }
 
- 
+    public Ingreso agregarIngreso(Ingreso ingreso) {
+        ingreso = ingresoRepository.save(ingreso);
+        resumenMensualService.actualizarResumenMensualConIngresos(ingreso.getUsuarioID(), ingreso.getFecha());
+        return ingreso;
+    }
+
+    public Ingreso actualizarIngreso(Long ingresoID, Ingreso ingresoDetails) {
+        return ingresoRepository.findById(ingresoID).map(ingreso -> {
+            ingreso.setConcepto(ingresoDetails.getConcepto());
+            ingreso.setMonto(ingresoDetails.getMonto());
+            Ingreso updatedIngreso = ingresoRepository.save(ingreso);
+            resumenMensualService.actualizarResumenMensualConIngresos(updatedIngreso.getUsuarioID(),
+                    updatedIngreso.getFecha());
+            return updatedIngreso;
+        }).orElse(null);
+    }
+
+    public boolean eliminarIngreso(Long ingresoID) {
+        return ingresoRepository.findById(ingresoID).map(ingreso -> {
+            ingresoRepository.delete(ingreso);
+            resumenMensualService.actualizarResumenMensualConIngresos(ingreso.getUsuarioID(), ingreso.getFecha());
+            return true;
+        }).orElse(false);
+    }
+
 }

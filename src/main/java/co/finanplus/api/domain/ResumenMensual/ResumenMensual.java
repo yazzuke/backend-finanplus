@@ -28,7 +28,7 @@ public class ResumenMensual {
     @Column(name = "UsuarioID")
     private String usuarioID;
 
-    @Temporal(TemporalType.DATE)
+
     @Column(name = "FechaInicio")
     private LocalDate fechaInicio;
 

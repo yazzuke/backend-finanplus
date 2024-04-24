@@ -42,7 +42,6 @@ public Usuario crearUsuario(@RequestBody Usuario usuario) {
     return usuarioGuardado;
 }
 
-
     // endpoint para obtener un usuario por su id
     @GetMapping("/usuarios/{userId}")
     public Usuario obtenerUsuario(@PathVariable String userId) {

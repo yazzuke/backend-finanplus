@@ -15,6 +15,7 @@ import co.finanplus.api.domain.Ingresos.Ingreso;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ResumenMensualService {
@@ -23,27 +24,24 @@ public class ResumenMensualService {
     private final UsuarioRepository usuarioRepository;
     private final IngresoRepository ingresoRepository;
 
-
-    public ResumenMensualService(ResumenMensualRepository resumenMensualRepository, UsuarioRepository usuarioRepository, IngresoRepository ingresoRepository) {
+    public ResumenMensualService(ResumenMensualRepository resumenMensualRepository, UsuarioRepository usuarioRepository,
+            IngresoRepository ingresoRepository) {
         this.resumenMensualRepository = resumenMensualRepository;
         this.usuarioRepository = usuarioRepository;
         this.ingresoRepository = ingresoRepository;
     }
 
-
     public ResumenMensual crearResumenInicial(String usuarioID, LocalDate fechaInicio) {
         ResumenMensual resumen = new ResumenMensual(
-            null,
-            usuarioID,
-            fechaInicio,
-            BigDecimal.ZERO,
-            BigDecimal.ZERO,
-            BigDecimal.ZERO,
-            false
-        );
+                null,
+                usuarioID,
+                fechaInicio,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                false);
         return resumenMensualRepository.save(resumen);
     }
-
 
     // Cada vez que se inicia un nuevo mes, se cierran los resúmenes del mes pasado
     // y se crean nuevos resúmenes para el mes actual
@@ -54,7 +52,8 @@ public class ResumenMensualService {
         LocalDate primerDiaDelProximoMes = hoy.plusMonths(1).withDayOfMonth(1);
 
         // Cerrar los resúmenes del mes pasado
-        List<ResumenMensual> resumenesDelMesPasado = resumenMensualRepository.findByFechaInicioAndCerrado(primerDiaDelMesActual, false);
+        List<ResumenMensual> resumenesDelMesPasado = resumenMensualRepository
+                .findByFechaInicioAndCerrado(primerDiaDelMesActual, false);
         for (ResumenMensual resumen : resumenesDelMesPasado) {
             resumen.setCerrado(true);
             resumenMensualRepository.save(resumen);
@@ -67,5 +66,31 @@ public class ResumenMensualService {
         }
     }
 
-  
-}   
+    // Método para calcular el total de ingresos de un usuario en un mes específico
+    public BigDecimal calcularTotalIngresosPorUsuarioYFecha(String usuarioID, LocalDate fechaInicio) {
+        LocalDate fechaFin = fechaInicio.withDayOfMonth(fechaInicio.lengthOfMonth()); // Último día del mes
+        List<Ingreso> ingresosDelUsuario = ingresoRepository.findByUsuarioIDAndFechaBetween(usuarioID, fechaInicio,
+                fechaFin);
+        return ingresosDelUsuario.stream()  
+                .map(Ingreso::getMonto)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public ResumenMensual actualizarResumenMensualConIngresos(String usuarioID, LocalDate fechaInicio) {
+        BigDecimal totalIngresos = calcularTotalIngresosPorUsuarioYFecha(usuarioID, fechaInicio);
+
+        Optional<ResumenMensual> optionalResumen = resumenMensualRepository.findByUsuarioIDAndFechaInicio(usuarioID,
+                fechaInicio);
+        ResumenMensual resumen;
+        if (optionalResumen.isPresent()) {
+            resumen = optionalResumen.get();
+        } else {
+            // Only create a new summary if one does not exist
+            resumen = crearResumenInicial(usuarioID, fechaInicio);
+        }
+
+        resumen.setTotalIngresos(totalIngresos);
+        return resumenMensualRepository.save(resumen);
+    }
+
+}
