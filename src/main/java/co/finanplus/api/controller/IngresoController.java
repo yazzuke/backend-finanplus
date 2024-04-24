@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import co.finanplus.api.domain.Ingresos.Ingreso;
 import co.finanplus.api.domain.Ingresos.IngresoRepository;
+import co.finanplus.api.service.IngresoService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,6 +18,8 @@ public class IngresoController {
 
     @Autowired
     private IngresoRepository ingresoRepository;
+
+  
 
     // endpoint para obtener los ingresos de un usuario
     @GetMapping

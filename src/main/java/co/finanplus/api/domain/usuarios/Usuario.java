@@ -18,6 +18,8 @@ public class Usuario {
     private String id;
     private String nombre;
     private String email;
-    private String photo_url;
 
+    @Column(name = "photo_url")
+    private String photoUrl;
+    
 }
