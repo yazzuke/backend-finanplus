@@ -1,24 +1,74 @@
 package co.finanplus.api.controller;
 
+import co.finanplus.api.domain.ResumenMensual.ResumenMensual;
+import co.finanplus.api.domain.ResumenMensual.ResumenMensualRepository;
+import co.finanplus.api.dto.GastosUpdateRequest;
+import co.finanplus.api.service.ResumenMensualService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import co.finanplus.api.domain.ResumenMensual.ResumenMensual;
-import co.finanplus.api.service.ResumenMensualService;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.PatchMapping;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
-@RequestMapping("/usuarios/resumenmensual")
+@RequestMapping("/usuarios/{usuarioID}/resumenmensual")
 public class ResumenMensualController {
 
-    private final ResumenMensualService resumenMensualService;
+    @Autowired
+    private ResumenMensualService resumenMensualService;
 
-    public ResumenMensualController(ResumenMensualService resumenMensualService) {
-        this.resumenMensualService = resumenMensualService;
+    @Autowired
+    private ResumenMensualRepository resumenMensualRepository;
+
+    @GetMapping
+    public ResponseEntity<List<ResumenMensual>> getResumenMensualByUsuarioID(@PathVariable String usuarioID) {
+        List<ResumenMensual> resumenes = resumenMensualService.findByUsuarioID(usuarioID);
+        if (resumenes.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(resumenes);
+        
     }
 
+    @PatchMapping("/{resumenID}/updateGastos")
+    public ResponseEntity<ResumenMensual> patchTotalGastos(@PathVariable Long resumenID, @RequestBody GastosUpdateRequest request) {
+        ResumenMensual resumen = resumenMensualRepository.findById(resumenID)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resumen no encontrado"));
+        resumen.setTotalGastos(request.getTotalGastos());
+        resumenMensualRepository.save(resumen);
+        return ResponseEntity.ok(resumen);
+    }
+ 
+    
+    @GetMapping("/fecha")
+    public ResponseEntity<List<ResumenMensual>> getResumenMensualByMonthAndYear(
+            @PathVariable String usuarioID,
+            @RequestParam int year,
+            @RequestParam int month) {
+    
+        LocalDate startDate = LocalDate.of(year, month, 1);
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+    
+        List<ResumenMensual> resumenes = resumenMensualRepository.findByUsuarioIDAndFechaInicioBetween(usuarioID, startDate, endDate);
+        if (resumenes.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(resumenes);
+    }
+    
+    
 
 
 }
+
+

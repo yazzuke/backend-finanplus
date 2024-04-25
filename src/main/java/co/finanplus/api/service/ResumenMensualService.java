@@ -10,6 +10,8 @@ import co.finanplus.api.domain.ResumenMensual.ResumenMensual;
 import co.finanplus.api.domain.ResumenMensual.ResumenMensualRepository;
 import co.finanplus.api.domain.usuarios.Usuario;
 import co.finanplus.api.domain.usuarios.UsuarioRepository;
+import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCredito;
+import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
 import co.finanplus.api.domain.Ingresos.Ingreso;
 
 import java.math.BigDecimal;
@@ -23,12 +25,14 @@ public class ResumenMensualService {
     private final ResumenMensualRepository resumenMensualRepository;
     private final UsuarioRepository usuarioRepository;
     private final IngresoRepository ingresoRepository;
+    private final TarjetaCreditoRepository tarjetaCreditoRepository;
 
     public ResumenMensualService(ResumenMensualRepository resumenMensualRepository, UsuarioRepository usuarioRepository,
-            IngresoRepository ingresoRepository) {
+            IngresoRepository ingresoRepository, TarjetaCreditoRepository tarjetaCreditoRepository) {
         this.resumenMensualRepository = resumenMensualRepository;
         this.usuarioRepository = usuarioRepository;
         this.ingresoRepository = ingresoRepository;
+        this.tarjetaCreditoRepository = tarjetaCreditoRepository;
     }
 
     public ResumenMensual crearResumenInicial(String usuarioID, LocalDate fechaInicio) {
@@ -76,6 +80,9 @@ public class ResumenMensualService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+
+    
+
     public ResumenMensual actualizarResumenMensualConIngresos(String usuarioID, LocalDate fechaInicio) {
         BigDecimal totalIngresos = calcularTotalIngresosPorUsuarioYFecha(usuarioID, fechaInicio);
 
@@ -92,5 +99,11 @@ public class ResumenMensualService {
         resumen.setTotalIngresos(totalIngresos);
         return resumenMensualRepository.save(resumen);
     }
+
+    public List<ResumenMensual> findByUsuarioID(String usuarioID) {
+        return resumenMensualRepository.findByUsuarioID(usuarioID);
+    }
+
+    
 
 }
