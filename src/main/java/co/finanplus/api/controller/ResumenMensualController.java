@@ -3,6 +3,7 @@ package co.finanplus.api.controller;
 import co.finanplus.api.domain.ResumenMensual.ResumenMensual;
 import co.finanplus.api.domain.ResumenMensual.ResumenMensualRepository;
 import co.finanplus.api.dto.GastosUpdateRequest;
+import co.finanplus.api.dto.TotalesMensualesDTO;
 import co.finanplus.api.service.ResumenMensualService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/usuarios/{usuarioID}/resumenmensual")
@@ -37,38 +39,50 @@ public class ResumenMensualController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(resumenes);
-        
+
     }
 
     @PatchMapping("/{resumenID}/updateGastos")
-    public ResponseEntity<ResumenMensual> patchTotalGastos(@PathVariable Long resumenID, @RequestBody GastosUpdateRequest request) {
+    public ResponseEntity<ResumenMensual> patchTotalGastos(@PathVariable Long resumenID,
+            @RequestBody GastosUpdateRequest request) {
         ResumenMensual resumen = resumenMensualRepository.findById(resumenID)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resumen no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resumen no encontrado"));
         resumen.setTotalGastos(request.getTotalGastos());
         resumenMensualRepository.save(resumen);
         return ResponseEntity.ok(resumen);
     }
- 
-    
+
     @GetMapping("/fecha")
     public ResponseEntity<List<ResumenMensual>> getResumenMensualByMonthAndYear(
             @PathVariable String usuarioID,
             @RequestParam int year,
             @RequestParam int month) {
-    
+
         LocalDate startDate = LocalDate.of(year, month, 1);
         LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-    
-        List<ResumenMensual> resumenes = resumenMensualRepository.findByUsuarioIDAndFechaInicioBetween(usuarioID, startDate, endDate);
+
+        List<ResumenMensual> resumenes = resumenMensualRepository.findByUsuarioIDAndFechaInicioBetween(usuarioID,
+                startDate, endDate);
         if (resumenes.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(resumenes);
     }
-    
-    
 
+ 
 
+    @GetMapping("/totales")
+public ResponseEntity<List<TotalesMensualesDTO>> getTotalesByUsuario(
+        @PathVariable String usuarioID,
+        @RequestParam(required = false) Integer year) {
+
+    List<TotalesMensualesDTO> totales = resumenMensualRepository.findTotalesByUsuarioIDAndYear(usuarioID, year);
+    if (totales.isEmpty()) {
+        return ResponseEntity.notFound().build();
+    } else {
+        return ResponseEntity.ok(totales);
+    }
 }
 
 
+}

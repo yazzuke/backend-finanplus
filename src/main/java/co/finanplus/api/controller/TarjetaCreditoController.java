@@ -92,15 +92,30 @@ public class TarjetaCreditoController {
     @GetMapping("/fecha")
     public ResponseEntity<List<TarjetaCredito>> listTarjetasByMonthAndYear(
             @PathVariable String usuarioID,
-            @RequestParam int year,
-            @RequestParam int month) {
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
 
-        LocalDate startDate = LocalDate.of(year, month, 1);
-        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        if (year == null) {
+            throw new IllegalArgumentException("El parámetro 'year' es requerido.");
+        }
 
-        List<TarjetaCredito> tarjetas = tarjetaCreditoRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate,
-                endDate);
-        return new ResponseEntity<>(tarjetas, HttpStatus.OK);
+        if (month != null) {
+            // Si se proporciona un mes, se obtienen las tarjetas de crédito solo para ese
+            // mes y año
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+            List<TarjetaCredito> tarjetas = tarjetaCreditoRepository.findByUsuarioIDAndFechaBetween(usuarioID,
+                    startDate, endDate);
+            return new ResponseEntity<>(tarjetas, HttpStatus.OK);
+        } else {
+            // Si no se proporciona un mes, se obtienen las tarjetas de crédito para todo el
+            // año
+            LocalDate startDate = LocalDate.of(year, 1, 1);
+            LocalDate endDate = startDate.withDayOfYear(startDate.lengthOfYear());
+            List<TarjetaCredito> tarjetas = tarjetaCreditoRepository.findByUsuarioIDAndFechaBetween(usuarioID,
+                    startDate, endDate);
+            return new ResponseEntity<>(tarjetas, HttpStatus.OK);
+        }
     }
 
     // endpoint para obtener los gastos de una tarjeta de crédito específica por
@@ -155,10 +170,10 @@ public class TarjetaCreditoController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Gasto de tarjeta no encontrado con ID: " + gastoID));
 
-        // Restar el viejo valor del gasto del valor total de la tarjeta antes de actualizar
+        // Restar el viejo valor del gasto del valor total de la tarjeta antes de
+        // actualizar
         TarjetaCredito tarjeta = gastoTarjeta.getTarjetaCredito();
         tarjeta.setValorTotal(tarjeta.getValorTotal().subtract(gastoTarjeta.getValorTotalGasto()));
-                
 
         boolean debeRecalcularCuota = false;
 
@@ -187,7 +202,6 @@ public class TarjetaCreditoController {
 
         tarjeta.setValorTotal(tarjeta.getValorTotal().add(gastoTarjeta.getValorTotalGasto()));
         tarjetaCreditoRepository.save(tarjeta);
-    
 
         GastoTarjeta updatedGastoTarjeta = gastoTarjetaRepository.save(gastoTarjeta);
         return ResponseEntity.ok(updatedGastoTarjeta);

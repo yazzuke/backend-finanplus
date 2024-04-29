@@ -89,15 +89,29 @@ public class GastoFijoController {
     @GetMapping("/fecha")
     public ResponseEntity<List<GastoFijo>> listGastosFijosByMonthAndYear(
             @PathVariable String usuarioID,
-            @RequestParam int year,
-            @RequestParam int month) {
-
-        LocalDate startDate = LocalDate.of(year, month, 1);
-        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
-
-        List<GastoFijo> gastosFijos = gastoFijoRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate, endDate);
-        return new ResponseEntity<>(gastosFijos, HttpStatus.OK);
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+    
+        if (year == null) {
+            throw new IllegalArgumentException("El parámetro 'year' es requerido.");
+        }
+    
+        if (month != null) {
+            // Si se proporciona un mes, se obtienen los gastos solo para ese mes y año
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+            List<GastoFijo> gastosFijos = gastoFijoRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate, endDate);
+            return new ResponseEntity<>(gastosFijos, HttpStatus.OK);
+        } else {
+            // Si no se proporciona un mes, se obtienen los gastos para todo el año
+            LocalDate startDate = LocalDate.of(year, 1, 1);
+            LocalDate endDate = startDate.withDayOfYear(startDate.lengthOfYear());
+            List<GastoFijo> gastosFijos = gastoFijoRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate, endDate);
+            return new ResponseEntity<>(gastosFijos, HttpStatus.OK);
+        }
     }
+    
+    
 
     // endpoint para obtener los gastos de un gasto fijo específico por fecha
     @GetMapping("/{gastoFijoID}/gastos/fecha")

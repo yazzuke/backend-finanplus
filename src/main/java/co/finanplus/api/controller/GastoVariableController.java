@@ -94,15 +94,28 @@ public class GastoVariableController {
     @GetMapping("/fecha")
     public ResponseEntity<List<GastoVariable>> listGastosVariablesByMonthAndYear(
             @PathVariable String usuarioID,
-            @RequestParam int year,
-            @RequestParam int month) {
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
 
-        LocalDate startDate = LocalDate.of(year, month, 1);
-        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        if (year == null) {
+            throw new IllegalArgumentException("El parámetro 'year' es requerido.");
+        }
 
-        List<GastoVariable> gastosVariables = gastoVariableRepository.findByUsuarioIDAndFechaBetween(
-                usuarioID, startDate, endDate);
-        return new ResponseEntity<>(gastosVariables, HttpStatus.OK);
+        if (month != null) {
+            // Si se proporciona un mes, se obtienen los gastos solo para ese mes y año
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+            List<GastoVariable> gastosVariables = gastoVariableRepository.findByUsuarioIDAndFechaBetween(usuarioID,
+                    startDate, endDate);
+            return new ResponseEntity<>(gastosVariables, HttpStatus.OK);
+        } else {
+            // Si no se proporciona un mes, se obtienen los gastos para todo el año
+            LocalDate startDate = LocalDate.of(year, 1, 1);
+            LocalDate endDate = startDate.withDayOfYear(startDate.lengthOfYear());
+            List<GastoVariable> gastosVariables = gastoVariableRepository.findByUsuarioIDAndFechaBetween(usuarioID,
+                    startDate, endDate);
+            return new ResponseEntity<>(gastosVariables, HttpStatus.OK);
+        }
     }
 
     // Endpoint para obtener gastos variables individuales de un gasto variable
@@ -149,37 +162,37 @@ public class GastoVariableController {
     // Endpoint para eliminar un gasto variable individual
     @DeleteMapping("/{gastoVariableID}/gastos/{gastoIndividualID}")
     public ResponseEntity<Void> deleteGastoVariableIndividual(@PathVariable Long gastoVariableID,
-                                                              @PathVariable Long gastoIndividualID) {
+            @PathVariable Long gastoIndividualID) {
         GastoVariableIndividual gastoIndividual = gastoVariableIndividualRepository.findById(gastoIndividualID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Gasto Variable Individual no encontrado con ID: " + gastoIndividualID));
-    
+
         GastoVariable gastoVariable = gastoIndividual.getGastoVariable();
         gastoVariable.setValorTotal(gastoVariable.getValorTotal().subtract(gastoIndividual.getValorTotalGasto()));
         gastoVariableRepository.save(gastoVariable); // Guarda el gasto variable con el nuevo valor total
-    
+
         gastoVariableIndividualRepository.delete(gastoIndividual);
         return ResponseEntity.ok().build();
     }
-    
 
     @PatchMapping("/{gastoVariableID}/gastos/{gastoIndividualID}")
     public ResponseEntity<GastoVariableIndividual> updateGastoVariableIndividual(
             @PathVariable Long gastoVariableID,
             @PathVariable Long gastoIndividualID,
             @RequestBody GastoVariableIndividual updateRequest) {
-    
+
         GastoVariableIndividual gastoIndividual = gastoVariableIndividualRepository.findById(gastoIndividualID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Gasto Variable Individual no encontrado con ID: " + gastoIndividualID));
-    
+
         GastoVariable gastoVariable = gastoIndividual.getGastoVariable();
         BigDecimal valorAntiguo = gastoIndividual.getValorTotalGasto();
-    
+
         // Actualizar campos necesarios
         if (updateRequest.getValorGasto() != null) {
             gastoIndividual.setValorGasto(updateRequest.getValorGasto());
-            // Si se actualiza el valor del gasto, recalcular el valor total del gasto variable
+            // Si se actualiza el valor del gasto, recalcular el valor total del gasto
+            // variable
             BigDecimal valorTotalActual = gastoVariable.getValorTotal();
             BigDecimal valorNuevo = updateRequest.getValorGasto();
             BigDecimal valorTotalNuevo = valorTotalActual.subtract(valorAntiguo).add(valorNuevo);
@@ -187,11 +200,10 @@ public class GastoVariableController {
             gastoVariableRepository.save(gastoVariable);
         }
         // Otras actualizaciones si son necesarias...
-    
+
         GastoVariableIndividual updatedGastoIndividual = gastoVariableIndividualRepository.save(gastoIndividual);
         return ResponseEntity.ok(updatedGastoIndividual);
     }
-    
 
     // Endpoint para actualizar el estado de pago de un gasto variable individual
     @PatchMapping("/{gastoVariableID}/gastos/{gastoIndividualID}/pagado")

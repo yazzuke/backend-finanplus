@@ -90,15 +90,28 @@ public class GastoDiarioController {
     @GetMapping("/fecha")
     public ResponseEntity<List<GastoDiario>> listGastosDiarioByMonthAndYear(
             @PathVariable String usuarioID,
-            @RequestParam int year,
-            @RequestParam int month) {
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
 
-        LocalDate startDate = LocalDate.of(year, month, 1);
-        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+        if (year == null) {
+            throw new IllegalArgumentException("El parámetro 'year' es requerido.");
+        }
 
-        List<GastoDiario> gastosFijos = gastoDiarioRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate,
-                endDate);
-        return new ResponseEntity<>(gastosFijos, HttpStatus.OK);
+        if (month != null) {
+            // Si se proporciona un mes, se obtienen los gastos solo para ese mes y año
+            LocalDate startDate = LocalDate.of(year, month, 1);
+            LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+            List<GastoDiario> gastosDiarios = gastoDiarioRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate,
+                    endDate);
+            return new ResponseEntity<>(gastosDiarios, HttpStatus.OK);
+        } else {
+            // Si no se proporciona un mes, se obtienen los gastos para todo el año
+            LocalDate startDate = LocalDate.of(year, 1, 1);
+            LocalDate endDate = startDate.withDayOfYear(startDate.lengthOfYear());
+            List<GastoDiario> gastosDiarios = gastoDiarioRepository.findByUsuarioIDAndFechaBetween(usuarioID, startDate,
+                    endDate);
+            return new ResponseEntity<>(gastosDiarios, HttpStatus.OK);
+        }
     }
 
     // Endpoint to obtain individual expenses of a specific daily expense by month
@@ -166,17 +179,18 @@ public class GastoDiarioController {
             @PathVariable Long gastoDiarioID,
             @PathVariable Long gastoID,
             @RequestBody GastoDiarioIndividual updateRequest) {
-    
+
         GastoDiarioIndividual gasto = gastoDiarioIndividualRepository.findById(gastoID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                         "Gasto individual no encontrado con ID: " + gastoID));
-    
+
         BigDecimal valorAntiguo = gasto.getValorTotalGasto();
-    
+
         // Actualizar los campos necesarios
         if (updateRequest.getValorGasto() != null) {
             gasto.setValorGasto(updateRequest.getValorGasto());
-            // Si se actualiza el valor del gasto, recalcular el valor total del gasto diario
+            // Si se actualiza el valor del gasto, recalcular el valor total del gasto
+            // diario
             GastoDiario gastoDiario = gasto.getGastoDiario();
             BigDecimal valorTotalActual = gastoDiario.getValorTotal();
             BigDecimal valorNuevo = updateRequest.getValorGasto();
@@ -184,10 +198,9 @@ public class GastoDiarioController {
             gastoDiario.setValorTotal(valorTotalNuevo);
             gastoDiarioRepository.save(gastoDiario);
         }
-       
-    
+
         GastoDiarioIndividual updatedGasto = gastoDiarioIndividualRepository.save(gasto);
         return ResponseEntity.ok(updatedGasto);
     }
-    
+
 }
