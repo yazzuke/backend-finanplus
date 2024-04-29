@@ -41,16 +41,22 @@ public class ResumenMensualController {
         return ResponseEntity.ok(resumenes);
 
     }
-
+    
     @PatchMapping("/{resumenID}/updateGastos")
     public ResponseEntity<ResumenMensual> patchTotalGastos(@PathVariable Long resumenID,
             @RequestBody GastosUpdateRequest request) {
         ResumenMensual resumen = resumenMensualRepository.findById(resumenID)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Resumen no encontrado"));
         resumen.setTotalGastos(request.getTotalGastos());
+        
+        // Recalcula el balance
+        BigDecimal balance = resumen.getTotalIngresos().subtract(request.getTotalGastos());
+        resumen.setBalance(balance);
+        
         resumenMensualRepository.save(resumen);
         return ResponseEntity.ok(resumen);
     }
+    
 
     @GetMapping("/fecha")
     public ResponseEntity<List<ResumenMensual>> getResumenMensualByMonthAndYear(
