@@ -52,6 +52,10 @@ public class GastoTarjeta {
         return valorTotalGasto;
     }
 
+      // Método para incrementar cuotaActual
+      public void incrementarCuotaActual() {
+        this.cuotaActual++;
+    }
     
 }
 
