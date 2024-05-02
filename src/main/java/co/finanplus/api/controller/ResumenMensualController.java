@@ -58,6 +58,7 @@ public class ResumenMensualController {
     }
     
 
+    // trae un solo resumen por año y mes
     @GetMapping("/fecha")
     public ResponseEntity<List<ResumenMensual>> getResumenMensualByMonthAndYear(
             @PathVariable String usuarioID,
@@ -77,6 +78,8 @@ public class ResumenMensualController {
 
  
 
+
+    // trae TODOS los resumenes por año y por mes
     @GetMapping("/totales")
 public ResponseEntity<List<TotalesMensualesDTO>> getTotalesByUsuario(
         @PathVariable String usuarioID,
