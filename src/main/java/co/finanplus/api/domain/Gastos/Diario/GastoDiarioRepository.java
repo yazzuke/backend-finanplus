@@ -3,6 +3,8 @@ package co.finanplus.api.domain.Gastos.Diario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import co.finanplus.api.domain.Gastos.Variables.GastoVariable;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -11,6 +13,7 @@ public interface GastoDiarioRepository extends JpaRepository<GastoDiario, Long>{
     List<GastoDiario> findByUsuarioID(String usuarioID);
     List<GastoDiario> findByUsuarioIDAndFechaBetween(String usuarioID, LocalDate start, LocalDate end);
 
+    List<GastoDiario> findByUsuarioIDOrderByFecha(String usuarioID);
 
     
 }

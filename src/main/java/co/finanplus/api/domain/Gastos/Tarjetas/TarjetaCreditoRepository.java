@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -18,4 +20,6 @@ public interface TarjetaCreditoRepository extends JpaRepository<TarjetaCredito, 
     @Cacheable(value = "tarjetasCreditoPorUsuario", key = "#usuarioId")
     List<TarjetaCredito> findByUsuarioID(String usuarioID);
     List<TarjetaCredito> findByUsuarioIDAndFechaBetween(String usuarioID, LocalDate start, LocalDate end);
+
+    List<TarjetaCredito> findByUsuarioIDOrderByFecha(String usuarioID);
 }

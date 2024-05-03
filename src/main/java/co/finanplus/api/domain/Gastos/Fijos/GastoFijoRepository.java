@@ -10,6 +10,7 @@
     public interface GastoFijoRepository extends JpaRepository<GastoFijo, Long>             {
         List<GastoFijo> findByUsuarioID(String usuarioID);
         List<GastoFijo> findByUsuarioIDAndFechaBetween(String usuarioID, LocalDate start, LocalDate end);
+        List<GastoFijo> findByUsuarioIDOrderByFecha(String usuarioID);
 
         
     }
