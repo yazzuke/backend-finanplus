@@ -1,6 +1,5 @@
 package co.finanplus.api.service;
 
-
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
@@ -17,8 +16,13 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.Font;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Font.FontFamily;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Paragraph;
 
 import co.finanplus.api.domain.Gastos.Diario.GastoDiario;
 import co.finanplus.api.domain.Gastos.Diario.GastoDiarioIndividual;
@@ -27,6 +31,9 @@ import co.finanplus.api.domain.Gastos.Fijos.GastoFijo;
 import co.finanplus.api.domain.Gastos.Fijos.GastoFijoRepository;
 import co.finanplus.api.domain.Gastos.Fijos.GastoInvFijo;
 import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjeta;
+import co.finanplus.api.domain.ResumenMensual.ResumenMensual;
+import co.finanplus.api.domain.ResumenMensual.ResumenMensualRepository;
+import co.finanplus.api.dto.TotalesMensualesDTO;
 import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjetaRepository;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCredito;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
@@ -57,12 +64,19 @@ public class PDFGeneratorService {
     @Autowired
     private GastoDiarioRepository gastoDiarioRepository;
 
+    @Autowired
+    private ResumenMensualRepository resumenMensualRepository;
+
     private String obtenerNombreMes(LocalDate fecha) {
         return fecha.getMonth().getDisplayName(TextStyle.FULL, Locale.getDefault());
     }
 
-    private Map<LocalDate, List<Object>> agruparGastosPorMes(List<TarjetaCredito> tarjetasCredito,
-            List<GastoFijo> gastosFijos, List<GastoVariable> gastosVariables, List<GastoDiario> gastosDiarios) {
+    private Map<LocalDate, List<Object>> agruparGastosPorMes(
+            List<TarjetaCredito> tarjetasCredito,
+            List<GastoFijo> gastosFijos,
+            List<GastoVariable> gastosVariables,
+            List<GastoDiario> gastosDiarios,
+            List<ResumenMensual> resumenesMensuales) {
         Map<LocalDate, List<Object>> gastosPorMes = new LinkedHashMap<>(); // Usar LinkedHashMap para mantener el orden
                                                                            // de inserción
 
@@ -72,6 +86,13 @@ public class PDFGeneratorService {
                 .forEach(mes -> {
                     gastosPorMes.put(mes, new ArrayList<>());
                 });
+
+        for (ResumenMensual resumen : resumenesMensuales) {
+            LocalDate mes = resumen.getFechaInicio().withDayOfMonth(1);
+            List<Object> gastosDelMes = gastosPorMes.getOrDefault(mes, new ArrayList<>());
+            gastosDelMes.add(resumen);
+            gastosPorMes.put(mes, gastosDelMes);
+        }
 
         // Agregar tarjetas de crédito
         for (TarjetaCredito tarjeta : tarjetasCredito) {
@@ -114,6 +135,8 @@ public class PDFGeneratorService {
 
         List<GastoVariable> gastosVariables = gastoVariableRepository.findByUsuarioIDOrderByFecha(userId);
         List<GastoDiario> gastosDiarios = gastoDiarioRepository.findByUsuarioIDOrderByFecha(userId);
+        // Obtener los resúmenes mensuales del usuario
+        List<ResumenMensual> resumenesMensuales = resumenMensualRepository.findByUsuarioID(userId);
         Usuario usuario = usuarioRepository.findById(userId).orElse(null);
 
         if (tarjetasCredito.isEmpty() && gastosFijos.isEmpty() && gastosDiarios.isEmpty()
@@ -123,10 +146,14 @@ public class PDFGeneratorService {
             return null;
         }
 
+        // formatea los numeros
+        DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance();
+        symbols.setDecimalSeparator('.');
+        symbols.setGroupingSeparator(',');
+        DecimalFormat df = new DecimalFormat("#,##0", symbols);
+
         String nombreUsuario = usuario.getNombre();
         String emailUsuario = usuario.getEmail();
-
-        String urlFotoPerfil = usuario.getPhotoUrl();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Document doc = new Document();
@@ -134,24 +161,45 @@ public class PDFGeneratorService {
             PdfWriter.getInstance(doc, outputStream);
             doc.open();
 
-            doc.add(new Paragraph("Usuario: " + nombreUsuario, new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD)));
+            doc.add(new Paragraph("Usuario: " + nombreUsuario, new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD)));
             doc.add(new Paragraph("Email: " + emailUsuario));
+            
 
             Map<LocalDate, List<Object>> gastosPorMes = agruparGastosPorMes(tarjetasCredito, gastosFijos,
-                    gastosVariables, gastosDiarios);
+                    gastosVariables, gastosDiarios, resumenesMensuales);
 
             for (Map.Entry<LocalDate, List<Object>> entry : gastosPorMes.entrySet()) {
                 LocalDate mes = entry.getKey();
                 List<Object> gastosDelMes = entry.getValue();
 
-                doc.add(new Paragraph("Gastos del mes " + obtenerNombreMes(mes) + ":"));
+                doc.add(new Paragraph("Resumen del mes de " + obtenerNombreMes(mes) + ":",
+                        new Font(Font.FontFamily.HELVETICA, 15, Font.BOLD)));
 
                 for (Object gasto : gastosDelMes) {
-                    if (gasto instanceof TarjetaCredito) {
+
+                    // Genera los resumenes
+                    if (gasto instanceof ResumenMensual) {
+                        ResumenMensual resumen = (ResumenMensual) gasto;
+                        Paragraph resumenMes = new Paragraph();
+                        resumenMes.add(new Chunk("Total Ingresos: ", new Font(FontFamily.HELVETICA, 13, Font.BOLD)));
+                        resumenMes.add(new Chunk(df.format(resumen.getTotalIngresos())));
+                        resumenMes.add(new Chunk(" - Total Gastos: ", new Font(FontFamily.HELVETICA, 13, Font.BOLD)));
+                        resumenMes.add(new Chunk(df.format(resumen.getTotalGastos())));
+                        resumenMes.add(new Chunk(" - Balance: ", new Font(FontFamily.HELVETICA, 13, Font.BOLD)));
+                        resumenMes.add(new Chunk(df.format(resumen.getBalance())));
+                        doc.add(resumenMes);
+                    }
+
+                    // genera las tarjetas de credito
+                    else if (gasto instanceof TarjetaCredito) {
                         TarjetaCredito tarjetaCredito = (TarjetaCredito) gasto;
-                        doc.add(new Paragraph("Tarjeta de Crédito: " + tarjetaCredito.getNombreTarjeta()));
+                        doc.add(new Paragraph("Tarjetas de Credito del Mes: ",
+                                new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD)));
+
+                        doc.add(new Paragraph("Nombre de la Tarjeta de Crédito: " + tarjetaCredito.getNombreTarjeta()));
                         doc.add(new Paragraph("Fecha de Pago: " + tarjetaCredito.getFechaPago().toString()));
-                        doc.add(new Paragraph("Valor Total: " + tarjetaCredito.getValorTotal().toString()));
+                        doc.add(new Paragraph("Valor Total: " + df.format(tarjetaCredito.getValorTotal())));
+
                         doc.add(new Paragraph("\n"));
 
                         List<GastoTarjeta> gastosTC = tarjetaCredito.getGastos();
@@ -170,8 +218,9 @@ public class PDFGeneratorService {
                                 table.addCell(gastoTC.getNombreGasto());
                                 table.addCell(gastoTC.getCuotaTotal().toString());
                                 table.addCell(gastoTC.getCuotaActual().toString());
-                                table.addCell(gastoTC.getValorCuotaGasto().toString());
-                                table.addCell(gastoTC.getValorTotalGasto().toString());
+                                table.addCell(df.format(gastoTC.getValorCuotaGasto()));
+                                table.addCell(df.format(gastoTC.getValorTotalGasto()));
+
                                 table.addCell(gastoTC.getTipo().toString());
                                 table.addCell(gastoTC.getFecha().toString());
                             }
@@ -180,12 +229,14 @@ public class PDFGeneratorService {
                         }
 
                         doc.add(new Paragraph("\n"));
+
+                        // genera los gastos fijos
                     } else if (gasto instanceof GastoFijo) {
-                        doc.add(new Paragraph("Gasto Fijos del mes: "));
+                        doc.add(new Paragraph("Gastos Fijos del Mes: ",
+                                new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD)));
                         GastoFijo gastoFijo = (GastoFijo) gasto;
                         doc.add(new Paragraph("Nombre del gasto fijo: " + gastoFijo.getNombreGasto()));
-                        doc.add(new Paragraph("Valor Total: " + gastoFijo.getValorTotal().toString()));
-                        doc.add(new Paragraph("Fecha: " + gastoFijo.getFecha().toString()));
+                        doc.add(new Paragraph("Valor Total: " +  df.format(gastoFijo.getValorTotal())));
                         doc.add(new Paragraph("\n"));
 
                         List<GastoInvFijo> gastosIndividuales = gastoFijo.getGastos();
@@ -199,7 +250,7 @@ public class PDFGeneratorService {
 
                             for (GastoInvFijo gastoIndividual : gastosIndividuales) {
                                 table.addCell(gastoIndividual.getNombreGasto());
-                                table.addCell(gastoIndividual.getValorGasto().toString());
+                                table.addCell(df.format(gastoIndividual.getValorGasto()));
                                 table.addCell(gastoIndividual.getFecha().toString());
                                 table.addCell(gastoIndividual.getTipo().toString());
                             }
@@ -208,11 +259,13 @@ public class PDFGeneratorService {
                         }
 
                         doc.add(new Paragraph("\n"));
+
+                        // Genera los gastos variables
                     } else if (gasto instanceof GastoVariable) {
-                        doc.add(new Paragraph("Gasto Variables del mes: "));
+                        doc.add(new Paragraph("Gastos Variables del Mes: ",
+                                new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD)));
                         GastoVariable gastoVariable = (GastoVariable) gasto;
-                        doc.add(new Paragraph("Valor Total: " + gastoVariable.getValorTotal().toString()));
-                        doc.add(new Paragraph("Fecha: " + gastoVariable.getFecha().toString()));
+                        doc.add(new Paragraph("Valor Total: " + df.format(gastoVariable.getValorTotal())));
                         doc.add(new Paragraph("\n"));
 
                         List<GastoVariableIndividual> gastosIndividuales = gastoVariable.getGastos();
@@ -226,7 +279,7 @@ public class PDFGeneratorService {
 
                             for (GastoVariableIndividual gastoIndividual : gastosIndividuales) {
                                 table.addCell(gastoIndividual.getNombreGasto());
-                                table.addCell(gastoIndividual.getValorGasto().toString());
+                                table.addCell(df.format(gastoIndividual.getValorGasto()));
                                 table.addCell(gastoIndividual.getFecha().toString());
                                 table.addCell(gastoIndividual.getTipo().toString());
                             }
@@ -236,11 +289,12 @@ public class PDFGeneratorService {
 
                         doc.add(new Paragraph("\n"));
 
+                        // genera los gastos diarios
                     } else if (gasto instanceof GastoDiario) {
-                        doc.add(new Paragraph("Gastos Diarios del mes: " , new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD)));
+                        doc.add(new Paragraph("Gastos Diarios del Mes: ",
+                                new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD)));
                         GastoDiario gastoDiario = (GastoDiario) gasto;
-                        doc.add(new Paragraph("Valor Total: " + gastoDiario.getValorTotal().toString()));
-                        doc.add(new Paragraph("Fecha: " + gastoDiario.getFecha().toString()));
+                        doc.add(new Paragraph("Valor Total: " + df.format(gastoDiario.getValorTotal())));
                         doc.add(new Paragraph("\n"));
 
                         List<GastoDiarioIndividual> gastosIndividuales = gastoDiario.getGastos();
@@ -254,7 +308,7 @@ public class PDFGeneratorService {
 
                             for (GastoDiarioIndividual gastoIndividual : gastosIndividuales) {
                                 table.addCell(gastoIndividual.getNombreGasto());
-                                table.addCell(gastoIndividual.getValorGasto().toString());
+                                table.addCell(df.format(gastoIndividual.getValorGasto()));
                                 table.addCell(gastoIndividual.getFecha().toString());
                                 table.addCell(gastoIndividual.getTipo().toString());
                             }
@@ -263,6 +317,7 @@ public class PDFGeneratorService {
                         }
 
                         doc.add(new Paragraph("\n"));
+
                     }
                 }
 

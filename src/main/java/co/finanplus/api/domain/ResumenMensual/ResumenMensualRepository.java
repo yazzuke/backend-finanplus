@@ -33,5 +33,6 @@ public interface ResumenMensualRepository extends JpaRepository<ResumenMensual, 
        "GROUP BY FUNCTION('YEAR', r.fechaInicio), FUNCTION('MONTH', r.fechaInicio)")
 List<TotalesMensualesDTO> findTotalesByUsuarioIDAndYear(@Param("usuarioID") String usuarioID, @Param("year") Integer year);
 
+        
 
 }
