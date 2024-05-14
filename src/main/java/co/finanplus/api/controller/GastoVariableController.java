@@ -1,7 +1,6 @@
 package co.finanplus.api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,11 +19,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import co.finanplus.api.domain.Gastos.Diario.GastoDiario;
-import co.finanplus.api.domain.Gastos.Diario.GastoDiarioIndividual;
-import co.finanplus.api.domain.Gastos.Diario.GastoDiarioIndividualRepository;
-import co.finanplus.api.domain.Gastos.Diario.GastoDiarioRepository;
-import co.finanplus.api.domain.Gastos.Diario.TipoDiario;
+
 import co.finanplus.api.domain.Gastos.Diario.TipoGastoRequest;
 import co.finanplus.api.domain.Gastos.Variables.GastoVariable;
 import co.finanplus.api.domain.Gastos.Variables.GastoVariableIndividual;

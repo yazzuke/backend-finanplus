@@ -11,7 +11,6 @@ import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.util.List;
 
 @Service

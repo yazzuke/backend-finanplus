@@ -1,18 +1,16 @@
--- Comando para crear la tabla TarjetasCredito
-CREATE TABLE GastosFijos (
+CREATE TABLE gastosfijos (
   Gasto_FijoID INT AUTO_INCREMENT PRIMARY KEY,
   UsuarioID VARCHAR(100),
   Nombre_Gasto VARCHAR(255),
   Valor_Total DECIMAL(10, 2),
   Fecha_Insertado DATE,
   Cerrado BOOLEAN DEFAULT FALSE,
-  FOREIGN KEY (UsuarioID) REFERENCES Usuarios(id)
+  FOREIGN KEY (UsuarioID) REFERENCES usuarios(id)
 );
 
 -- Comando para crear la tabla GastosTarjeta
-CREATE TABLE GastosFijosInv (
+CREATE TABLE gastosfijosinv (
   GastoID INT AUTO_INCREMENT PRIMARY KEY,
-  IngresoID INT,
   Gasto_FijoID INT,
   Nombre_Gasto VARCHAR(255),
   Valor_Gasto INT,
@@ -21,6 +19,5 @@ CREATE TABLE GastosFijosInv (
   Fecha_Insertado DATE,
   Pagado BOOLEAN DEFAULT FALSE,
   Cerrado BOOLEAN DEFAULT FALSE,
-   FOREIGN KEY (Gasto_FijoID) REFERENCES GastosFijos(Gasto_FijoID),
-   FOREIGN KEY (IngresoID) REFERENCES ingresos(IngresoID)
+   FOREIGN KEY (Gasto_FijoID) REFERENCES gastosfijos(Gasto_FijoID)
 );

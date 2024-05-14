@@ -9,7 +9,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjeta;
 
 @Entity
 @Table(name = "gastosfijos")

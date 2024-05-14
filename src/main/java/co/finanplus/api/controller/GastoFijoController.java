@@ -12,12 +12,6 @@ import co.finanplus.api.domain.Gastos.Fijos.GastoInvFijo;
 import co.finanplus.api.domain.Gastos.Fijos.GastoInvFijoRepository;
 import co.finanplus.api.domain.Gastos.Fijos.TipoFijo;
 import co.finanplus.api.domain.Gastos.Fijos.TipoGastoRequest;
-import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjeta;
-import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjetaRepository;
-import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCredito;
-import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
-import co.finanplus.api.domain.Gastos.Tarjetas.TipoGasto;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;

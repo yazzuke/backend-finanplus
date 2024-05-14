@@ -1,4 +1,4 @@
-CREATE TABLE ResumenMensual (
+CREATE TABLE resumenmensual (
     ResumenID INT AUTO_INCREMENT PRIMARY KEY,
     UsuarioID VARCHAR(100) NOT NULL,
     FechaInicio DATE NOT NULL, -- El primer día del mes del resumen

@@ -10,12 +10,10 @@ import co.finanplus.api.domain.ResumenMensual.ResumenMensual;
 import co.finanplus.api.domain.ResumenMensual.ResumenMensualRepository;
 import co.finanplus.api.domain.usuarios.Usuario;
 import co.finanplus.api.domain.usuarios.UsuarioRepository;
-import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCredito;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
 import co.finanplus.api.domain.Ingresos.Ingreso;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 

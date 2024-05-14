@@ -21,8 +21,7 @@ import java.text.DecimalFormatSymbols;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Font.FontFamily;
-import com.itextpdf.text.Element;
-import com.itextpdf.text.Paragraph;
+
 
 import co.finanplus.api.domain.Gastos.Diario.GastoDiario;
 import co.finanplus.api.domain.Gastos.Diario.GastoDiarioIndividual;
@@ -33,7 +32,7 @@ import co.finanplus.api.domain.Gastos.Fijos.GastoInvFijo;
 import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjeta;
 import co.finanplus.api.domain.ResumenMensual.ResumenMensual;
 import co.finanplus.api.domain.ResumenMensual.ResumenMensualRepository;
-import co.finanplus.api.dto.TotalesMensualesDTO;
+
 import co.finanplus.api.domain.Gastos.Tarjetas.GastoTarjetaRepository;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCredito;
 import co.finanplus.api.domain.Gastos.Tarjetas.TarjetaCreditoRepository;
@@ -193,7 +192,7 @@ public class PDFGeneratorService {
                     // genera las tarjetas de credito
                     else if (gasto instanceof TarjetaCredito) {
                         TarjetaCredito tarjetaCredito = (TarjetaCredito) gasto;
-                        doc.add(new Paragraph("Tarjetas de Credito del Mes: ",
+                        doc.add(new Paragraph("Tarjetas de Credito: ",
                                 new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD)));
 
                         doc.add(new Paragraph("Nombre de la Tarjeta de Crédito: " + tarjetaCredito.getNombreTarjeta()));
@@ -232,7 +231,7 @@ public class PDFGeneratorService {
 
                         // genera los gastos fijos
                     } else if (gasto instanceof GastoFijo) {
-                        doc.add(new Paragraph("Gastos Fijos del Mes: ",
+                        doc.add(new Paragraph("Gastos Fijos: ",
                                 new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD)));
                         GastoFijo gastoFijo = (GastoFijo) gasto;
                         doc.add(new Paragraph("Nombre del gasto fijo: " + gastoFijo.getNombreGasto()));
@@ -262,7 +261,7 @@ public class PDFGeneratorService {
 
                         // Genera los gastos variables
                     } else if (gasto instanceof GastoVariable) {
-                        doc.add(new Paragraph("Gastos Variables del Mes: ",
+                        doc.add(new Paragraph("Gastos Variables: ",
                                 new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD)));
                         GastoVariable gastoVariable = (GastoVariable) gasto;
                         doc.add(new Paragraph("Valor Total: " + df.format(gastoVariable.getValorTotal())));
@@ -291,7 +290,7 @@ public class PDFGeneratorService {
 
                         // genera los gastos diarios
                     } else if (gasto instanceof GastoDiario) {
-                        doc.add(new Paragraph("Gastos Diarios del Mes: ",
+                        doc.add(new Paragraph("Gastos Diarios: ",
                                 new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD)));
                         GastoDiario gastoDiario = (GastoDiario) gasto;
                         doc.add(new Paragraph("Valor Total: " + df.format(gastoDiario.getValorTotal())));

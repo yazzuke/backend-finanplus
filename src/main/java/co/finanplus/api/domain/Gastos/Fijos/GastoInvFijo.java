@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import co.finanplus.api.domain.Ahorros.TipoAhorro;
+
 
 @Entity
 @Table(name = "gastosfijosinv")
@@ -25,10 +25,7 @@ public class GastoInvFijo {
     @JoinColumn(name = "Gasto_FijoID")
     @JsonBackReference
     private GastoFijo gastoFijo;
-
-    @Column(name = "IngresoID")
-    private Long ingresoID;
-
+    
     @Column(name = "Nombre_Gasto")
     private String nombreGasto;
 
